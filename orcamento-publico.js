@@ -1,5 +1,5 @@
 // ============================================================
-// KIT NARV — A página que o CLIENTE abre
+// LOEN SOLUÇÕES — A página que o CLIENTE abre
 //
 // Quem chega aqui é o cliente do prestador, não quem usa o app.
 // Ele não faz login: o código do link é a chave, e ele só abre
@@ -50,7 +50,7 @@ function mostrarErro(titulo, texto) {
     '<div class="topo"><div class="quem">Orçamento</div></div>' +
     '<div class="cartao"><p class="servico">' + escapar(titulo) + '</p>' +
     '<p class="descricao">' + escapar(texto) + '</p></div>' +
-    '<p class="rodape">Kit Narv</p>';
+    '<p class="rodape">Loen Soluções</p>';
 }
 
 // ------------------------------------------------------------
@@ -137,7 +137,7 @@ function desenhar(token, o) {
          '<div id="aviso"></div>';
   }
 
-  h += '<p class="rodape">Orçamento enviado pelo Kit Narv</p>';
+  h += '<p class="rodape">Orçamento enviado pelo Loen Soluções</p>';
   tela.innerHTML = h;
 
   if (!respondido && !vencido) {

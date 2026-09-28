@@ -1,5 +1,5 @@
 /* ============================================================
-   KIT NARV — Sistema visual Narv Comunidade
+   LOEN SOLUÇÕES — Sistema visual
    ============================================================ */
 
 /* ---------- paleta da marca Narv ----------
@@ -100,15 +100,6 @@ h2 { font-size: 22px; }
 
 .marca { text-align: center; margin: 40px 0 34px; }
 
-.marca .simbolo {
-  width: 96px; height: 96px;
-  margin: 0 auto 16px;
-  border-radius: 26px 26px 26px 8px;   /* quadrado assimétrico da Narv */
-  background: var(--creme);
-  display: flex; align-items: center; justify-content: center;
-  padding: 12px;
-}
-.marca .simbolo svg { width: 100%; height: 100%; display: block; }
 
 .marca h1 { font-size: 36px; }
 .marca p { color: var(--cinza); margin: 6px 0 0; font-size: 16px; }

@@ -1,5 +1,5 @@
 // ============================================================
-// KIT NARV — Calculadora de orçamento
+// LOEN SOLUÇÕES — Calculadora de orçamento
 //
 // A CONTA (não mexer sem falar com o Leandro):
 //

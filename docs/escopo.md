@@ -8,6 +8,32 @@ aqui, e é discutida depois.
 
 ---
 
+## Em andamento — decidido em 28/09/2026
+
+O app passa a se chamar **Loen Soluções**. Nada de "Narv" no que a pessoa
+vê. O papagaio saiu da tela de entrada; o logo da Loen vem depois.
+
+A recuperação de senha **saiu do congelado** e vira autosserviço por
+e-mail, sem WhatsApp. Ordem, uma tarefa por vez:
+
+1. ~~Trocar o nome visível e tirar o papagaio~~ — feito em 28/09
+2. E-mail obrigatório para todo mundo (cadastro, convite e contas antigas)
+3. "Esqueci minha senha": função no servidor que manda o link pelo Resend
+   para o e-mail de verdade, e tela de nova senha
+4. Entrar com celular **ou** e-mail
+
+O WhatsApp (31) 97158-9587 fica só no botão de suporte ("Achei um problema
+no app"). O texto antigo de recuperação pelo WhatsApp continua até a
+tarefa 3 ficar pronta, para ninguém ficar sem saída no meio do caminho.
+
+Ficam como estão, por decisão técnica: o domínio interno do login
+(`celular.kitnarv.app`) — invisível, e trocar exige reescrever o login de
+todas as contas em produção — e o nome do repositório, que muda o endereço
+do app e quebra links já enviados. Esse último vai junto quando a Loen
+tiver domínio próprio.
+
+---
+
 ## Como chegamos até aqui
 
 Reconstruído a partir do histórico do repositório, porque a conversa em que
@@ -138,9 +164,6 @@ tem 5–8 MB e o limite grátis é 1 GB no total).
 
 - **Relatório mensal para imprimir ou mandar** — diferente do comprovante
   de renda, que já existe: seria o detalhe do mês, serviço a serviço.
-- **"Esqueci minha senha" por e-mail** — esbarra no login por celular: o
-  e-mail do Supabase é fabricado. Precisa de desenho e de um serviço de
-  envio (o Resend tem 3.000/mês de graça).
 - **Editar o próprio perfil** — nome e celular de quem usa.
 - **Recorrência** — "repetir este atendimento em 15 dias". Hoje o botão
   "Repetir serviço" no perfil do cliente cobre o caso em dois toques.

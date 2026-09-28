@@ -1,5 +1,5 @@
 // ============================================================
-// KIT NARV — Entrada no app
+// LOEN SOLUÇÕES — Entrada no app
 //
 // A pessoa entra com CELULAR e SENHA.
 // Por baixo, o sistema usa um e-mail gerado a partir do celular,
@@ -259,7 +259,7 @@ function ocupado(botao, sim, textoOcupado = 'Aguarde…') {
 
 // Traduz o erro técnico para algo que a pessoa entende
 function mensagemDeErro(erro) {
-  console.error('Kit Narv — erro:', erro);
+  console.error('Loen Soluções — erro:', erro);
   const m = (erro?.message || '').toLowerCase();
 
   if (m.includes('too many') || m.includes('rate limit') || erro?.status === 429)
@@ -340,7 +340,7 @@ $('#form-login').addEventListener('submit', async (e) => {
 
 $('#btn-recuperar').addEventListener('click', () => {
   aviso('aviso-login',
-    'Chame a equipe Narv no WhatsApp (31) 97158-9587 para recuperar sua senha. ' +
+    'Chame a equipe Loen no WhatsApp (31) 97158-9587 para recuperar sua senha. ' +
     'Tenha em mãos o celular cadastrado.', 'ok');
 });
 
@@ -576,7 +576,7 @@ function destravarBotoes() {
 }
 
 function avisarFalha(erro) {
-  console.error('Kit Narv — erro não tratado:', erro);
+  console.error('Loen Soluções — erro não tratado:', erro);
   destravarBotoes();
 
   const msg = String(erro?.message || erro || '');
@@ -587,7 +587,7 @@ function avisarFalha(erro) {
     ? 'Não consegui falar com o servidor. Confira sua internet e tente de novo — ' +
       'o que você digitou continua aí na tela.'
     : 'Tente de novo. Se continuar assim, toque no botão abaixo para ' +
-      'avisar a equipe Narv — eu já mando junto o que estava acontecendo.';
+      'avisar a equipe Loen — eu já mando junto o que estava acontecendo.';
 
   // Usa a folha do app quando ela existe; senão, o aviso simples.
   if (typeof avisarNaFolha === 'function' && document.getElementById('folha-pergunta')) {
@@ -595,7 +595,7 @@ function avisarFalha(erro) {
     // O botão leva direto ao WhatsApp da equipe, e leva junto o que
     // aconteceu — assim ninguém precisa adivinhar depois.
     const acao = semRede ? null : {
-      rotulo: 'Avisar a equipe Narv',
+      rotulo: 'Avisar a equipe Loen',
       fazer: () => falarComAEquipe(msg)
     };
     avisarNaFolha(titulo, texto, acao);
@@ -610,7 +610,7 @@ function avisarFalha(erro) {
 function falarComAEquipe(detalheTecnico) {
   const aba = document.querySelector('.abas button.ativa')?.textContent?.trim() || 'Início';
 
-  let texto = 'Oi, equipe Narv! Achei um problema no app.\n\n' +
+  let texto = 'Oi, equipe Loen! Achei um problema no app.\n\n' +
               'O que aconteceu: (conte aqui)\n\n' +
               '--- para a equipe ---\n' +
               'Tela: ' + aba + '\n';

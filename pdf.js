@@ -1,5 +1,5 @@
 // ============================================================
-// KIT NARV — PDF do orçamento e envio pelo WhatsApp
+// LOEN SOLUÇÕES — PDF do orçamento e envio pelo WhatsApp
 //
 // O PDF é montado NO CELULAR dela, com jsPDF. Não passa por
 // servidor nenhum — combina com a arquitetura sem back-end.
@@ -38,7 +38,7 @@ async function logoParaPdf() {
       leitor.readAsDataURL(blob);
     });
   } catch (e) {
-    console.error('Kit Narv — logo do PDF:', e);
+    console.error('Loen Soluções — logo do PDF:', e);
     return null;
   }
 }
@@ -243,7 +243,7 @@ async function montarPdf(o, cliente, itens) {
   if (contatos.length) doc.text(contatos.join('   ·   '), M, yRodape - 1);
 
   doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(...CINZA_PDF);
-  doc.text('Orçamento gerado pelo Kit Narv', LARG - M, yRodape - 1, { align: 'right' });
+  doc.text('Orçamento gerado pelo Loen Soluções', LARG - M, yRodape - 1, { align: 'right' });
 
   if (n.endereco) {
     doc.setFontSize(8).setTextColor(...CINZA_PDF);
@@ -437,7 +437,7 @@ async function gerarComprovanteDeRenda(meses = 6) {
 
   // O rodapé precisa ser honesto sobre o que este papel é.
   doc.setFont('helvetica', 'normal').setFontSize(8.5).setTextColor(...CINZA_PDF);
-  const nota = 'Este documento foi gerado pelo aplicativo Kit Narv a partir dos ' +
+  const nota = 'Este documento foi gerado pelo aplicativo Loen Soluções a partir dos ' +
                'registros feitos pelo próprio profissional. Não substitui declaração ' +
                'contábil nem documento fiscal.';
   let yr = 272;

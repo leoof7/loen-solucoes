@@ -1,5 +1,5 @@
 // ============================================================
-// KIT NARV — O app depois de entrar
+// LOEN SOLUÇÕES — O app depois de entrar
 // Abas: Início · Serviços · Orçamentos · Clientes · Financeiro
 // ============================================================
 
@@ -163,13 +163,13 @@ async function carregarTudo() {
   if (erroPerfil) {
     // Migração 12 ainda não rodou: as colunas novas não existem.
     // Tenta de novo com o mínimo, para o app não ficar de fora do ar.
-    console.warn('Kit Narv — tentando carregar sem os campos novos:', erroPerfil.message);
+    console.warn('Loen Soluções — tentando carregar sem os campos novos:', erroPerfil.message);
     const basico = await sb.from('perfis')
       .select('id, nome, papel, celular, foto_caminho, negocio_id, ' +
               'negocios(id, nome, tipo_atividade, tem_equipe, logo_caminho)')
       .eq('id', id).maybeSingle();
     if (basico.error || !basico.data) {
-      console.error('Kit Narv — perfil:', basico.error || 'sem perfil');
+      console.error('Loen Soluções — perfil:', basico.error || 'sem perfil');
       return false;
     }
     perfilCarregado(basico.data);
@@ -1394,7 +1394,7 @@ async function desenharEquipe() {
   $$('#conteudo-convidar [data-copiar]').forEach(b =>
     b.addEventListener('click', async () => {
       const codigo = b.dataset.copiar;
-      const texto = 'Olá! Use este código para entrar na equipe no app Narv: ' + codigo;
+      const texto = 'Olá! Use este código para entrar na equipe no app Loen Soluções: ' + codigo;
       try {
         await navigator.clipboard.writeText(texto);
         aviso('aviso-convidar', 'Copiado. Agora é só colar no WhatsApp da pessoa.', 'ok');
@@ -1916,7 +1916,7 @@ async function ofereceLancarEntrada(a) {
 // ------------------------------------------------------------
 
 // Trocar a senha só funciona para quem está logado — ou seja, para quem
-// LEMBRA a senha atual. Quem esqueceu continua dependendo da equipe Narv
+// LEMBRA a senha atual. Quem esqueceu continua dependendo da equipe Loen
 // no WhatsApp, porque o login é por celular e o e-mail do Supabase é
 // fabricado. Isso está registrado como próxima fase.
 $('#aj-senha').addEventListener('click', () => {
@@ -2065,7 +2065,7 @@ $('#aj-renda').addEventListener('click', async () => {
       'Use este papel para alugar, financiar ou abrir MEI. ' +
       'Quanto mais tempo você registrar, mais forte ele fica.');
   } catch (e) {
-    console.error('Kit Narv — comprovante:', e);
+    console.error('Loen Soluções — comprovante:', e);
     avisarNaFolha('Não deu certo', escapar(e.message || 'Não consegui gerar o comprovante.'));
   }
 });

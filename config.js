@@ -1,5 +1,5 @@
 // ============================================================
-// KIT NARV — Configuração
+// LOEN SOLUÇÕES — Configuração
 //
 // O app escolhe o banco SOZINHO, pelo endereço em que está aberto.
 // Ninguém edita este arquivo para trocar de ambiente — editar à mão
@@ -83,5 +83,5 @@ if (usandoProducaoPorFalta) {
     'Preencha AMBIENTES.homologacao no config.js para parar de correr esse risco.'
   );
 } else {
-  console.info('Kit Narv — banco de ' + CONFIG.AMBIENTE_NOME);
+  console.info('Loen Soluções — banco de ' + CONFIG.AMBIENTE_NOME);
 }

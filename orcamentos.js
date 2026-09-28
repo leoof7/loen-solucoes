@@ -1,5 +1,5 @@
 // ============================================================
-// KIT NARV — Orçamentos
+// LOEN SOLUÇÕES — Orçamentos
 //
 // Etapa A: lista com filtros, orçamento rápido, detalhe e status.
 // Etapa B (calculadora) e C (PDF e WhatsApp com anexo) vêm depois.
@@ -36,7 +36,7 @@ async function vencerOsVencidos() {
     .update({ status: 'vencido' })
     .in('id', vencidos.map(o => o.id));
 
-  if (error) { console.error('Kit Narv — vencer orçamentos:', error); return false; }
+  if (error) { console.error('Loen Soluções — vencer orçamentos:', error); return false; }
   vencidos.forEach(o => { o.status = 'vencido'; });
   return true;
 }
@@ -407,7 +407,7 @@ async function mandarOrcamentoNoWhatsApp(o, c) {
     }
   } catch (e) {
     ocupado(botao, false);
-    console.error('Kit Narv — PDF:', e);
+    console.error('Loen Soluções — PDF:', e);
     aviso('aviso-ver-orcamento', e.message || 'Não consegui gerar o PDF.');
   }
 }
@@ -420,7 +420,7 @@ async function baixarPdf(o, c) {
     ocupado(botao, false);
   } catch (e) {
     ocupado(botao, false);
-    console.error('Kit Narv — PDF:', e);
+    console.error('Loen Soluções — PDF:', e);
     aviso('aviso-ver-orcamento', e.message || 'Não consegui gerar o PDF.');
   }
 }
@@ -446,7 +446,7 @@ function perguntarNoWhatsApp(id) {
 async function itensDoOrcamento(id) {
   const { data, error } = await sb.from('orcamento_itens')
     .select('*').eq('orcamento_id', id).order('ordem');
-  if (error) { console.error('Kit Narv — itens do orçamento:', error); return []; }
+  if (error) { console.error('Loen Soluções — itens do orçamento:', error); return []; }
   return data || [];
 }
 
