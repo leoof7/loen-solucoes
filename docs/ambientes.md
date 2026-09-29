@@ -35,7 +35,7 @@ COMO ESTÁ HOJE                    COMO FICA DEPOIS
 **No painel do Supabase:**
 
 1. Clique no nome da organização (canto superior esquerdo) → **New project**
-2. Nome: `NARV-homologacao`
+2. Nome: `loen-homologacao`
 3. Região: **South America (São Paulo)** — a mesma da produção
 4. Senha do banco: gere uma e **guarde**. Não é a mesma da produção
 5. Aguarde uns 2 minutos
@@ -69,7 +69,7 @@ Pronto. A partir daí:
 | `localhost` | homologação |
 | rede local (`192.168...`) | homologação |
 | `leoof7.github.io` | produção |
-| `narv.app` | produção |
+| domínio próprio da Loen | produção |
 
 E fora de produção o app mostra uma **faixa listrada no topo** dizendo
 onde você está. Não dá para confundir.
@@ -94,7 +94,7 @@ Está pronto em `.github/workflows/backup.yml`. Para ligar:
 1. Pegue a chave secreta:
    Supabase → Project Settings → API Keys → **Secret keys** → `default` →
    ícone de olho → copiar
-2. Vá em `github.com/leoof7/NARV` → **Settings** → **Secrets and
+2. Vá em `github.com/leoof7/loen-solucoes` → **Settings** → **Secrets and
    variables** → **Actions** → **New repository secret**
 3. Nome: `SUPABASE_SECRET_KEY`
    Valor: a chave que você copiou
@@ -121,17 +121,17 @@ também.
 
 ---
 
-## Passo 3 — O domínio narv.app
+## Passo 3 — O domínio próprio da Loen
 
 Quando comprar o domínio:
 
 1. No provedor do domínio, aponte para o GitHub Pages
-2. Em `github.com/leoof7/NARV` → Settings → Pages → **Custom domain** →
-   `narv.app`
+2. Em `github.com/leoof7/loen-solucoes` → Settings → Pages → **Custom domain** →
+   o domínio da Loen
 3. Marque **Enforce HTTPS**
 
-O `config.js` **já reconhece** `narv.app`, `www.narv.app` e qualquer
-subdomínio. Não precisa mexer em código.
+Depois, acrescente o domínio na lista de endereços de produção do
+`config.js` (função `ambienteAtual`).
 
 ---
 

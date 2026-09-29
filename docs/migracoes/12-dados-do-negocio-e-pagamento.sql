@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 12
+-- LOEN SOLUÇÕES — migração 12
 -- Dados do negócio para o orçamento, e forma de pagamento
 --
 -- O QUE ENTRA E POR QUÊ

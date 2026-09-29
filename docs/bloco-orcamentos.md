@@ -1,4 +1,4 @@
-# NARV — Bloco Orçamentos
+# LOEN SOLUÇÕES — Bloco Orçamentos
 
 Escopo recebido do Leandro em 31/08/2026, vindo do chat anterior.
 Este documento é a fonte da verdade deste bloco.

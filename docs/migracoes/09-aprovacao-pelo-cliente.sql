@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 09
+-- LOEN SOLUÇÕES — migração 09
 -- O cliente aprova ou recusa o orçamento por um link
 --
 -- COMO FUNCIONA

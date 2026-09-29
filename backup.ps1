@@ -1,5 +1,5 @@
 # ============================================================
-# NARV - Backup do banco
+# Loen Solucoes - Backup do banco
 #
 # POR QUE EM POWERSHELL
 #
@@ -68,7 +68,7 @@ if (-not $chave) {
 $chave = $chave.Trim().Trim('"').Trim("'").Trim()
 
 Write-Host ""
-Write-Host "NARV - Backup do banco" -ForegroundColor Cyan
+Write-Host "Loen Solucoes - Backup do banco" -ForegroundColor Cyan
 Write-Host "======================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host ("Chave lida: {0}... ({1} caracteres)" -f $chave.Substring(0, [Math]::Min(14, $chave.Length)), $chave.Length) -ForegroundColor Gray
@@ -139,7 +139,7 @@ function ValorSql($v) {
 
 $resumo  = [ordered]@{}
 $falhou  = $false
-$sql     = "-- NARV - dados em $(Get-Date -Format 'dd/MM/yyyy HH:mm')`r`n"
+$sql     = "-- Loen Solucoes - dados em $(Get-Date -Format 'dd/MM/yyyy HH:mm')`r`n"
 $sql    += "-- Rode as migracoes de docs\migracoes\ ANTES deste arquivo.`r`n`r`nbegin;`r`n`r`n"
 
 foreach ($t in $tabelas) {

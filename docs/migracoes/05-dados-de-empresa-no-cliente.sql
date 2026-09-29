@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 05
+-- LOEN SOLUÇÕES — migração 05
 -- Dados de empresa no cadastro de cliente
 --
 -- POR QUE ESTA MIGRAÇÃO EXISTE

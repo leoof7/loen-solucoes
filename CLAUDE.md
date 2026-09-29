@@ -1,14 +1,15 @@
-# CLAUDE.md — NARV
+# CLAUDE.md — Loen Soluções
 
 Vale para este produto. O CLAUDE.md da Lesete (pasta acima) e o global do
-Leandro continuam valendo — este aqui só acrescenta o que é do NARV.
+Leandro continuam valendo — este aqui só acrescenta o que é do Loen Soluções.
 
-## O que é o NARV
+## O que é o Loen Soluções
 
 App para prestador de serviço autônomo tocar o próprio negócio pelo celular:
 clientes, serviços feitos, dinheiro que entra e sai, e uma meta mensal.
 
-O nome interno do que está construído hoje é **Kit Narv**.
+Antes se chamava NARV / Kit Narv. Desde 28/09/2026 o nome é **Loen Soluções**
+em tudo: tela, documento, repositório (`leoof7/loen-solucoes`) e login interno.
 
 ## Para quem é
 
@@ -40,15 +41,15 @@ padrão de fora.
 
 ## Decisões de produto que já estão de pé
 
-**Entra com celular e senha, não com e-mail.** O público não usa e-mail. Por
-baixo o Supabase exige e-mail, então o sistema fabrica um interno
-(`c55DDNNNNNNNNN@celular.kitnarv.app`) que a pessoa nunca vê e que nunca
-recebe mensagem. E-mail de verdade é opcional e serve só para recuperar a
-conta.
+**Entra com celular e senha.** Por baixo o Supabase exige e-mail, então o
+sistema fabrica um interno (`c55DDNNNNNNNNN@celular.loen.invalid`) que a
+pessoa nunca vê e que nunca recebe mensagem — o final `.invalid` é reservado
+para endereço que não existe. **Esse e-mail interno nunca muda de jeito.**
 
-**Recuperação de senha é humana.** Quem não deixou e-mail chama a equipe Narv
-no WhatsApp. Consequência séria: se ela errar a senha no cadastro, perde a
-conta — por isso confirmação de senha no cadastro não é luxo.
+**E-mail de verdade é obrigatório e serve para recuperar a senha.** Fica em
+`perfis.email_recuperacao`, nunca no login do Supabase. A recuperação é pelo
+próprio app, com link enviado pelo Resend — sem WhatsApp. (Decidido em
+28/09/2026, em construção.) O WhatsApp da equipe fica só no botão de suporte.
 
 **Cadastro é uma tela só.** Serviços, preços e meta ficam para depois de
 entrar. Menos de um minuto para criar a conta.
@@ -68,7 +69,7 @@ lista, não muda conta nenhuma. Saída pessoal e retirada contam igual na meta.
 
 ## Como este produto foge do padrão da Lesete
 
-O padrão da casa é Next.js na Vercel. **O NARV não usa.** São cinco arquivos
+O padrão da casa é Next.js na Vercel. **O Loen Soluções não usa.** São cinco arquivos
 soltos — HTML, CSS e JavaScript puro — servidos pelo GitHub Pages, falando
 direto com o Supabase pelo navegador.
 
@@ -99,11 +100,12 @@ verdade — não aceite "revisei o código" como prova de que funciona.
 
 ## Ambientes
 
-Hoje existe **um só** banco, `rtisqipntpnvlhetfoeb`, plano Free, e ele é
-produção com dados reais de participantes do piloto.
+Hoje existe **um só** banco, `rtisqipntpnvlhetfoeb`, plano Free. Em 28/09/2026
+o app **ainda não tem ninguém usando**: as contas são de teste e serão
+apagadas antes de ir ao ar.
 
 **Mudança de 17/09/2026: o banco saiu da conta do Leandro.** Foi transferido
-para a conta `redenarv@gmail.com` (organização "Lorena de Oliveira"), com os
+para a conta `redenarv@gmail.com` (organização renomeada para "Loen Soluções" em 28/09/2026), com os
 dados dentro — nada foi exportado nem apagado. Endereço e chaves não mudaram,
 então o app continua funcionando igual. O Leandro deixou de ser dono: se o
 acesso for retirado, ele fica sem o banco. O projeto está entregue e essa

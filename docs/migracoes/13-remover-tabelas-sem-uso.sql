@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 13
+-- LOEN SOLUÇÕES — migração 13
 -- Remover as tabelas que o app não usa
 --
 -- ⚠️  ESTA MIGRAÇÃO APAGA TABELAS E DADOS. NÃO TEM VOLTA.

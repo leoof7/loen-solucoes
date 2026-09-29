@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 06
+-- LOEN SOLUÇÕES — migração 06
 -- Hora do atendimento (para a Agenda)
 --
 -- POR QUE ESTA MIGRAÇÃO EXISTE

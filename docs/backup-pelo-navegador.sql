@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — Backup pelo navegador (plano B, sem terminal)
+-- LOEN SOLUÇÕES — Backup pelo navegador (plano B, sem terminal)
 --
 -- Use isto quando o backup.ps1 não funcionar. Aqui não tem
 -- chave, não tem terminal e não tem rede corporativa no meio:
@@ -11,7 +11,7 @@
 --   3. Vai aparecer UMA linha com UMA coluna chamada "backup"
 --   4. Clique na célula, copie o conteúdo inteiro
 --   5. Cole no Bloco de Notas e salve como:
---        backups\narv_AAAA-MM-DD.json
+--        backups\loen_AAAA-MM-DD.json
 --   6. Guarde uma cópia fora do computador (Drive, e-mail, HD)
 --
 -- O QUE ISTO SALVA

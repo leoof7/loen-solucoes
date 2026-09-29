@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 11
+-- LOEN SOLUÇÕES — migração 11
 -- Fecha as funções internas para quem não tem login
 --
 -- O QUE FOI ENCONTRADO (31/08/2026, testando o link de aprovação)

@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 07
+-- LOEN SOLUÇÕES — migração 07
 -- A meta mensal passa a ser visível só para o dono
 --
 -- O PROBLEMA (bug 16, encontrado em 31/08/2026)

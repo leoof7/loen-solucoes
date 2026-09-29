@@ -1,5 +1,5 @@
 # ============================================================
-# NARV - Guardar a chave do Supabase, uma vez so
+# Loen Solucoes - Guardar a chave do Supabase, uma vez so
 #
 # Salva a chave num cofre criptografado pelo Windows, amarrado a
 # SUA conta neste computador. Nem outro usuario da maquina le.
@@ -11,7 +11,7 @@
 # ============================================================
 
 Write-Host ""
-Write-Host "NARV - Guardar chave do Supabase" -ForegroundColor Cyan
+Write-Host "Loen Solucoes - Guardar chave do Supabase" -ForegroundColor Cyan
 Write-Host "=================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Pegue em: Supabase > Project Settings > API Keys > Secret keys" -ForegroundColor Gray

@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — Exportar a estrutura do banco
+-- LOEN SOLUÇÕES — Exportar a estrutura do banco
 --
 -- POR QUE ISTO EXISTE
 --

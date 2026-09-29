@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 10
+-- LOEN SOLUÇÕES — migração 10
 -- Log de eventos, para saber se o piloto está sendo usado
 --
 -- POR QUE

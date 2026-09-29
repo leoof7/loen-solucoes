@@ -1,5 +1,5 @@
 -- ============================================================
--- NARV — migração 08
+-- LOEN SOLUÇÕES — migração 08
 -- Valor de serviço e de orçamento passa a ser só do dono
 --
 -- A REGRA (definida pelo Leandro em 31/08/2026)

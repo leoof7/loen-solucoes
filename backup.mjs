@@ -1,5 +1,5 @@
 // ============================================================
-// NARV — Backup do banco, sem CLI
+// LOEN SOLUÇÕES — Backup do banco, sem CLI
 //
 // O CLI do Supabase falha nesta máquina com "Transport error".
 // Este script pula o CLI e fala direto com a API do projeto,
@@ -112,11 +112,11 @@ const carimbo = new Date().toISOString().slice(0, 16).replace('T', '_').replace(
 const pasta = join(process.cwd(), 'backups');
 mkdirSync(pasta, { recursive: true });
 
-console.log(`\nNARV - Backup do banco`);
+console.log(`\nLoen Solucoes - Backup do banco`);
 console.log(`======================\n`);
 
 const resumo = {};
-let sqlCompleto = `-- NARV — dados em ${new Date().toLocaleString('pt-BR')}\n` +
+let sqlCompleto = `-- Loen Soluções — dados em ${new Date().toLocaleString('pt-BR')}\n` +
                   `-- Rode as migracoes de docs/migracoes/ ANTES deste arquivo.\n\n` +
                   `begin;\n\n`;
 let falhou = false;
