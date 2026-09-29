@@ -714,7 +714,14 @@ async function iniciar() {
   if (codigo) return abrirRecuperacao(codigo);
 
   const { data } = await sb.auth.getSession();
-  if (data.session) await depoisDeEntrar();
+  if (data.session) return depoisDeEntrar();
+
+  // Vindo do botão "Criar conta" do site (loenstudiocriativo.com.br/solucoes):
+  // abre direto no cadastro, sem passar pela tela de entrar.
+  if (location.hash === '#criar-conta') {
+    history.replaceState(null, '', location.pathname);
+    irPara('tela-cadastro');
+  }
 }
 
 
