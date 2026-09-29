@@ -799,3 +799,5 @@ body.tem-faixa { padding-top: 26px; }
 .resposta-cliente { font-size: 14px; font-weight: 600; }
 .resposta-cliente.aprovado { color: var(--verde); }
 .resposta-cliente.recusado { color: var(--vermelho); }
+/* Na lista de orçamentos, a resposta do cliente vai na linha de baixo */
+.linha-orcamento .resposta-cliente { display: block; margin-top: 2px; }

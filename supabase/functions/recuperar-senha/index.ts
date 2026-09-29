@@ -54,14 +54,17 @@ function escapar(t: string) {
 
 function corpoDoEmail(nome: string, link: string) {
   const primeiro = escapar((nome || '').trim().split(/\s+/)[0] || '');
-  return `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#F6F1EC;font-family:Arial,Helvetica,sans-serif;color:#1B2230">
+  // Cores da Loen, iguais às do app (29/09/2026): fundo cinza claro,
+  // tinta preta, detalhe lima.
+  return `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#F7F7F7;font-family:Arial,Helvetica,sans-serif;color:#111111">
   <div style="max-width:480px;margin:0 auto;padding:32px 20px">
-    <p style="font-size:20px;font-weight:bold;color:#14357F;margin:0 0 24px">Loen Soluções</p>
+    <p style="font-size:20px;font-weight:bold;color:#111111;margin:0 0 6px">Loen Soluções</p>
+    <div style="width:48px;height:4px;background:#E9FA4C;border-radius:2px;margin:0 0 24px"></div>
     <p style="font-size:16px;line-height:1.5;margin:0 0 12px">Oi${primeiro ? ', ' + primeiro : ''}!</p>
     <p style="font-size:16px;line-height:1.5;margin:0 0 24px">Recebemos um pedido para criar uma senha nova na sua conta. Toque no botão abaixo:</p>
-    <p style="margin:0 0 24px"><a href="${link}" style="display:inline-block;background:#14357F;color:#fff;text-decoration:none;font-weight:bold;padding:14px 24px;border-radius:10px">Criar senha nova</a></p>
-    <p style="font-size:14px;line-height:1.5;color:#5A6472;margin:0 0 8px">O link vale por 1 hora e só funciona uma vez.</p>
-    <p style="font-size:14px;line-height:1.5;color:#5A6472;margin:0">Não foi você que pediu? Pode ignorar este e-mail. Sua senha continua a mesma.</p>
+    <p style="margin:0 0 24px"><a href="${link}" style="display:inline-block;background:#111111;color:#ffffff;text-decoration:none;font-weight:bold;padding:14px 24px;border-radius:12px">Criar senha nova</a></p>
+    <p style="font-size:14px;line-height:1.5;color:#4A4A4A;margin:0 0 8px">O link vale por 1 hora e só funciona uma vez.</p>
+    <p style="font-size:14px;line-height:1.5;color:#4A4A4A;margin:0">Não foi você que pediu? Pode ignorar este e-mail. Sua senha continua a mesma.</p>
   </div></body></html>`;
 }
 
