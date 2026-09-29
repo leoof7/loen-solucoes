@@ -84,17 +84,24 @@ function desenhar(token, o) {
   const respondido = !!o.respondido_em;
   const vencido = o.vencido && !respondido;
 
+  // Sem nome cadastrado, o banco devolve a profissão no lugar do nome —
+  // e ela aparecia duas vezes no topo. Ponto final do cadastro também sai,
+  // para não virar ".." no fim da frase.
+  const quem = String(o.negocio?.nome || '').trim().replace(/[.\s]+$/, '');
+  const oque = String(o.negocio?.atividade || '').trim();
   let h = '<div class="topo">' +
-          '<div class="quem">' + escapar(o.negocio?.nome || 'Orçamento') + '</div>' +
-          (o.negocio?.atividade
-            ? '<div class="oque">' + escapar(o.negocio.atividade) + '</div>' : '') +
+          '<div class="quem">' + escapar(quem || 'Orçamento') + '</div>' +
+          (oque && oque.replace(/[.\s]+$/, '') !== quem
+            ? '<div class="oque">' + escapar(oque) + '</div>' : '') +
           '</div>';
 
   if (respondido) {
+    // Não dizemos "já avisamos": o app não manda aviso nenhum. Quem fez o
+    // orçamento vê a resposta quando abre o app.
     h += o.resposta_cliente === 'recusado' || o.status === 'recusado'
       ? recado('nao', 'Você recusou este orçamento em ' + dataCurta(o.respondido_em) + '.')
       : recado('ok', '✓ Você aprovou este orçamento em ' + dataCurta(o.respondido_em) +
-                     '.<br>Já avisamos ' + escapar(o.negocio?.nome || 'o prestador') + '.');
+                     '.<br>' + escapar(quem || 'Quem fez o orçamento') + ' vai ver a sua resposta no app.');
   } else if (vencido) {
     h += recado('aviso', 'Este orçamento valia até ' + dataCurta(o.validade) +
                          '. Peça um novo para confirmar o preço.');
