@@ -176,7 +176,7 @@ function filtrarCampoDinheiro(campo) {
   });
 }
 
-$('input[data-dinheiro]').forEach(filtrarCampoDinheiro);
+$$('input[data-dinheiro]').forEach(filtrarCampoDinheiro);
 
 // Máscara de dinheiro, do jeito dos apps de banco: a pessoa só digita
 // números e a vírgula e o ponto aparecem sozinhos. 5 → 0,05; 500 → 5,00;
@@ -197,7 +197,7 @@ function mascararReais(campo) {
   });
 }
 
-$('input[data-reais]').forEach(mascararReais);
+$$('input[data-reais]').forEach(mascararReais);
 
 // Dinheiro nunca é negativo neste app: nem preço, nem custo, nem valor
 // cobrado. Um "-" que escape do filtro viraria desconto silencioso na

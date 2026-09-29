@@ -1526,7 +1526,7 @@ function desenharCatalogo() {
   }
 
   $('#conteudo-catalogo').innerHTML = h;
-  $('#conteudo-catalogo input[data-reais]').forEach(mascararReais);
+  $$('#conteudo-catalogo input[data-reais]').forEach(mascararReais);
 
   const bs = $('#btn-salvar-sugeridos');
   if (bs) bs.addEventListener('click', salvarSugeridos);
