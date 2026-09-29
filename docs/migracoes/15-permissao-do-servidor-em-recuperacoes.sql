@@ -1,0 +1,21 @@
+-- ============================================================
+-- LOEN SOLUÇÕES — migração 15
+-- Dá ao servidor permissão de usar a tabela recuperacoes
+--
+-- Não apaga nada.
+-- ============================================================
+--
+-- POR QUE ISTO EXISTE
+--
+-- A migração 14 criou a tabela recuperacoes, que conta quantos links
+-- de "Esqueci minha senha" saíram por conta na última hora. Mas o
+-- papel do servidor (service_role) ficou sem permissão de ler e
+-- gravar nela. Resultado, visto no teste de 29/09/2026: o e-mail
+-- chegava, mas a contagem falhava calada — a trava de no máximo 3
+-- links por hora nunca funcionou.
+--
+-- Anônimo e logado continuam sem acesso nenhum (RLS ligada e nenhuma
+-- política, como na 14).
+-- ============================================================
+
+grant select, insert on public.recuperacoes to service_role;
