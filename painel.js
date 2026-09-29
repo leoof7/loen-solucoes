@@ -1668,11 +1668,11 @@ async function abrirApp() {
   // quando isto mais importa: é a primeira coisa que ela vê no dia.
   if (typeof vencerOsVencidos === 'function') await vencerOsVencidos();
 
-  $('.tela').forEach(t => t.classList.remove('ativa'));
-  $('.app').style.display = 'none';
-  pedirEmailSeFaltar();   // some com a área de login, senão sobra espaço em branco
+  $$('.tela').forEach(t => t.classList.remove('ativa'));
+  $('.app').style.display = 'none';   // some com a área de login, senão sobra espaço em branco
   $('#painel').classList.add('ativo');
   abrirAba('inicio');
+  pedirEmailSeFaltar();
   registrar('entrou');
   return true;
 }
