@@ -27,8 +27,17 @@ $ErrorActionPreference = "Stop"
 
 $projeto = "rtisqipntpnvlhetfoeb"
 $base    = "https://$projeto.supabase.co"
-$tabelas = @("negocios","perfis","clientes","servicos_catalogo",
-             "atendimentos","lancamentos","retiradas","convites")
+# TODAS as tabelas, na ordem em que precisam voltar (quem aponta para
+# outra tabela vem depois dela). Se aparecer tabela nova no banco e ela
+# nao estiver aqui, o backup acusa e sai com erro — ver mais abaixo.
+$tabelas = @("negocios","perfis","convites","clientes","servicos_catalogo",
+             "historico_precos","atendimentos","orcamentos","orcamento_itens",
+             "lancamentos","retiradas","checklists","checklist_itens",
+             "atendimento_checklist","eventos","recuperacoes")
+
+# Copia extra fora deste computador: a pasta do OneDrive sobe sozinha
+# para a nuvem da conta Microsoft do Leandro.
+$pastaNuvem = Join-Path $env:USERPROFILE "OneDrive\Backups\Loen Solucoes"
 
 $chave = $env:SUPABASE_SECRET_KEY
 if (-not $chave) { $chave = $env:SUPABASE_SERVICE_KEY }   # aceita o nome antigo
@@ -119,6 +128,27 @@ if (-not $cab) {
 }
 Write-Host ""
 
+# Confere se o banco tem alguma tabela que a lista acima esqueceu.
+# Foi assim que os orcamentos ficaram fora do backup ate 29/09/2026:
+# a tabela nasceu depois do script e ninguem percebeu.
+$esquecidas = @()
+try {
+  $mapa = Invoke-RestMethod -Uri "$base/rest/v1/" -Headers $cab -Method Get -TimeoutSec 60
+  $noBanco = $mapa.paths.PSObject.Properties.Name |
+    Where-Object { $_ -match '^/[a-z_]+$' } | ForEach-Object { $_.TrimStart('/') }
+  $esquecidas = @($noBanco | Where-Object { $tabelas -notcontains $_ })
+} catch {
+  Write-Host "Nao consegui listar as tabelas do banco para conferir." -ForegroundColor Yellow
+}
+function FormatoDe($tabela, $coluna) {
+  try { return $mapa.definitions.$tabela.properties.$coluna.format } catch { return $null }
+}
+if ($esquecidas.Count -gt 0) {
+  Write-Host ("Tabela(s) no banco que o backup nao conhece: {0}" -f ($esquecidas -join ", ")) -ForegroundColor Red
+  Write-Host "Elas vao junto desta vez, mas acrescente na lista `$tabelas." -ForegroundColor Yellow
+  $tabelas += $esquecidas
+}
+
 $carimbo = Get-Date -Format "yyyy-MM-dd_HHmm"
 $pasta   = Join-Path $PSScriptRoot "backups"
 if (-not (Test-Path $pasta)) { New-Item -ItemType Directory -Path $pasta | Out-Null }
@@ -128,13 +158,28 @@ function Salvar($caminho, $texto) {
   [System.IO.File]::WriteAllText($caminho, $texto, $semBom)
 }
 
-# Transforma um valor em literal SQL seguro.
-function ValorSql($v) {
+function Texto($t) { return "'" + ([string]$t).Replace("'", "''") + "'" }
+
+# Transforma um valor em literal SQL seguro. $formato e o tipo da coluna
+# no banco (ex.: "text[]", "jsonb"), lido do mapa da API.
+function ValorSql($v, $formato) {
   if ($null -eq $v)            { return "null" }
+  # Sem o mapa, adivinha pelo formato do valor.
+  if (-not $formato) {
+    if ($v -is [System.Management.Automation.PSCustomObject]) { $formato = "jsonb" }
+    elseif ($v -is [array]) { $formato = "text[]" }
+  }
+  if ($formato -like "*[[]]") {
+    # Lista do Postgres: {"a","b"}
+    $itens = @($v) | ForEach-Object { '"' + ([string]$_).Replace('\', '\\').Replace('"', '\"') + '"' }
+    return Texto ("{" + ($itens -join ",") + "}")
+  }
+  if ($formato -like "json*")  { return (Texto (ConvertTo-Json -InputObject $v -Compress -Depth 20)) + "::jsonb" }
   if ($v -is [bool])           { if ($v) { return "true" } else { return "false" } }
-  if ($v -is [int] -or $v -is [long] -or $v -is [double] -or $v -is [decimal]) { return "$v" }
-  $t = [string]$v
-  return "'" + $t.Replace("'", "''") + "'"
+  if ($v -is [int] -or $v -is [long] -or $v -is [double] -or $v -is [decimal]) {
+    return $v.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+  }
+  return Texto $v
 }
 
 $resumo  = [ordered]@{}
@@ -159,7 +204,7 @@ foreach ($t in $tabelas) {
     if ($linhas.Count -gt 0) {
       $colunas = $linhas[0].PSObject.Properties.Name
       $tuplas = foreach ($l in $linhas) {
-        "  (" + (($colunas | ForEach-Object { ValorSql $l.$_ }) -join ", ") + ")"
+        "  (" + (($colunas | ForEach-Object { ValorSql $l.$_ (FormatoDe $t $_) }) -join ", ") + ")"
       }
       $sql += "-- $t : $($linhas.Count) linha(s)`r`n"
       $sql += "insert into public.$t (" + ($colunas -join ", ") + ") values`r`n"
@@ -200,12 +245,40 @@ $sql += "commit;`r`n"
 Salvar (Join-Path $pasta "${carimbo}_dados.sql") $sql
 Salvar (Join-Path $pasta "${carimbo}_resumo.json") ($resumo | ConvertTo-Json -Depth 4)
 
+# Copia para o OneDrive (se ele existir nesta maquina).
+if (Test-Path (Split-Path (Split-Path $pastaNuvem))) {
+  try {
+    if (-not (Test-Path $pastaNuvem)) { New-Item -ItemType Directory -Path $pastaNuvem -Force | Out-Null }
+    Copy-Item (Join-Path $pasta "${carimbo}_*") $pastaNuvem -Force
+    Write-Host "Copia enviada para o OneDrive: $pastaNuvem" -ForegroundColor Green
+  } catch {
+    $falhou = $true
+    Write-Host "Nao consegui copiar para o OneDrive: $($_.Exception.Message)" -ForegroundColor Red
+  }
+} else {
+  Write-Host "OneDrive nao encontrado. A copia ficou so neste computador." -ForegroundColor Yellow
+}
+
+# Guarda 30 dias de copias e apaga as mais velhas — so quando este
+# backup deu certo, para nunca ficar sem nenhuma. E o que a Politica de
+# Privacidade promete: conta apagada some dos backups em ate 30 dias.
+# So toca nos arquivos com o carimbo do backup (2026-09-29_0900_...).
+if (-not $falhou) {
+  $limite = (Get-Date).AddDays(-30)
+  foreach ($p in @($pasta, $pastaNuvem)) {
+    if (Test-Path $p) {
+      Get-ChildItem $p -File |
+        Where-Object { $_.Name -match '^\d{4}-\d{2}-\d{2}_\d{4}_' -and $_.LastWriteTime -lt $limite } |
+        Remove-Item -Force
+    }
+  }
+}
+
 Write-Host ""
-if ($falhou) {
-  Write-Host "ATENCAO: algo falhou acima. Isto NAO e um backup completo." -ForegroundColor Red
+if ($falhou -or $esquecidas.Count -gt 0) {
+  Write-Host "ATENCAO: algo falhou ou faltou acima. Confira antes de confiar neste backup." -ForegroundColor Red
   Write-Host ""
   exit 1
 }
 Write-Host "Tudo salvo em backups\ com o carimbo $carimbo" -ForegroundColor Green
-Write-Host "Guarde uma copia fora deste computador." -ForegroundColor Yellow
 Write-Host ""

@@ -51,6 +51,15 @@ para endereço que não existe. **Esse e-mail interno nunca muda de jeito.**
 próprio app, com link enviado pelo Resend — sem WhatsApp. (Decidido em
 28/09/2026, em construção.) O WhatsApp da equipe fica só no botão de suporte.
 
+**Conta nova só nasce com a Política de Privacidade aceita.** A caixa é
+obrigatória no cadastro e no convite, e o banco guarda a versão aceita
+(`CONFIG.VERSAO_PRIVACIDADE`). A política (`privacidade.html`) só descreve
+o que o app faz de verdade — mudou o app, confira a política.
+
+**Erro técnico nunca aparece para a pessoa.** Só passa direto o aviso
+escrito por nós no banco (código `P0001`, em português). O resto vira
+texto claro com um código curto para o suporte.
+
 **Cadastro é uma tela só.** Serviços, preços e meta ficam para depois de
 entrar. Menos de um minuto para criar a conta.
 
@@ -115,9 +124,16 @@ verdade — não aceite "revisei o código" como prova de que funciona.
 
 ## Ambientes
 
-Hoje existe **um só** banco, `rtisqipntpnvlhetfoeb`, plano Free. Em 28/09/2026
-o app **ainda não tem ninguém usando**: as contas são de teste e serão
-apagadas antes de ir ao ar.
+Desde 29/09/2026 existem **dois** bancos, os dois no plano Free e na
+organização "Loen Soluções":
+
+- **Produção** `rtisqipntpnvlhetfoeb` — o app publicado aponta para ele.
+  As contas que estão lá são de teste do Leandro e ficam.
+- **Homologação** `iswndjsgpdiuoxfnnwux` — o app aberto em qualquer outro
+  endereço (localhost) aponta para ele. Estrutura igual, sem dado real.
+
+Migração nova roda primeiro na homologação. Detalhes, backup e restauração
+em `docs/ambientes.md`.
 
 **Mudança de 17/09/2026: o banco saiu da conta do Leandro.** Foi transferido
 para a conta `redenarv@gmail.com` (organização renomeada para "Loen Soluções" em 28/09/2026), com os
@@ -129,8 +145,7 @@ consequência foi aceita por ele.
 Cópias do banco de 30 e 31/08/2026 estão fora do PC, no pacote
 `SENHAS E BACKUP (SQL)` do pen drive.
 
-O plano Free **não tem backup automático**. Exportar antes de qualquer
-mexida no banco é obrigatório, não recomendação.
-
-Banco de homologação está planejado, será criado a partir do que estiver em
-produção, e o Leandro avisa o dia.
+O plano Free **não tem backup automático**. O backup diário roda no PC do
+Leandro pelo Agendador do Windows e copia para o OneDrive (ADR-018).
+Exportar antes de qualquer mexida no banco continua obrigatório. O robô de
+backup do GitHub **não** deve ser ligado: o repositório é público.

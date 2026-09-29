@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=12">
+<link rel="stylesheet" href="estilo.css?v=13">
 </head>
 <body>
 
@@ -147,6 +147,11 @@
         </div>
       </details>
 
+      <label class="aceite" for="c-privacidade">
+        <input type="checkbox" id="c-privacidade">
+        <span>Li e aceito a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+      </label>
+
       <button class="btn btn-verde" id="btn-cadastro" type="submit">Criar conta e entrar</button>
     </form>
   </section>
@@ -211,6 +216,11 @@
           <button type="button">mostrar</button>
         </div>
       </div>
+
+      <label class="aceite" for="v-privacidade">
+        <input type="checkbox" id="v-privacidade">
+        <span>Li e aceito a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+      </label>
 
       <button class="btn btn-principal" id="btn-convite" type="submit">Entrar na equipe</button>
     </form>
@@ -975,6 +985,12 @@
     <button class="item" id="aj-reportar"><div class="corpo">
       <span class="titulo">Achei um problema no app</span>
       <span class="sub">Fala com a equipe Loen</span></div><div class="direita">›</div></button>
+    <button class="item" id="aj-baixar-dados"><div class="corpo">
+      <span class="titulo">Baixar meus dados</span>
+      <span class="sub">Uma cópia de tudo o que está no app, num arquivo</span></div><div class="direita">›</div></button>
+    <a class="item" href="privacidade.html" target="_blank" rel="noopener"><div class="corpo">
+      <span class="titulo">Política de Privacidade</span>
+      <span class="sub">O que guardamos e o que fazemos com seus dados</span></div><div class="direita">›</div></a>
 
     <button class="btn btn-secundario" id="aj-sair">Sair da conta</button>
     <button class="btn btn-perigo" id="aj-apagar">Apagar minha conta</button>
@@ -1045,11 +1061,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="config.js?v=12"></script>
-<script src="app.js?v=12"></script>
-<script src="painel.js?v=12"></script>
-<script src="orcamentos.js?v=12"></script>
-<script src="calculadora.js?v=12"></script>
-<script src="pdf.js?v=12"></script>
+<script src="config.js?v=13"></script>
+<script src="app.js?v=13"></script>
+<script src="painel.js?v=13"></script>
+<script src="orcamentos.js?v=13"></script>
+<script src="calculadora.js?v=13"></script>
+<script src="pdf.js?v=13"></script>
 </body>
 </html>

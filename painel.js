@@ -185,6 +185,9 @@ async function carregarTudo() {
   // aqui derrubava quem entrava com a migração 12 pendente.
   const ehDono = estado.perfil.papel === 'dono';
 
+  // Os dados são do negócio; quem baixa é o dono (o banco também exige).
+  $('#aj-baixar-dados').style.display = ehDono ? '' : 'none';
+
   const [cat, cli, ate, orc] = await Promise.all([
     sb.from('servicos_catalogo').select('*').eq('ativo', true).order('nome'),
     sb.from('clientes').select('*').eq('arquivado', false).order('nome'),
@@ -1463,6 +1466,32 @@ $('#btn-gerar-convite').addEventListener('click', async () => {
 $('#aj-catalogo').addEventListener('click', () => { fecharFolha('folha-ajustes'); abrirCatalogo(); });
 $('#aj-imagem').addEventListener('click',  () => { fecharFolha('folha-ajustes'); abrirFolha('folha-imagem'); });
 
+// Direito de acesso e portabilidade (LGPD, art. 18): o dono baixa uma
+// cópia de tudo o que o negócio tem no app, num arquivo que qualquer
+// outro sistema consegue ler (JSON).
+$('#aj-baixar-dados').addEventListener('click', async () => {
+  const botao = $('#aj-baixar-dados');
+  ocupado(botao, true, 'Preparando…');
+  const { data, error } = await sb.rpc('exportar_meus_dados');
+  ocupado(botao, false);
+  if (error) return avisarNaFolha('Não deu certo', escapar(mensagemDeErro(error)));
+
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  const arquivo = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(arquivo);
+  link.download = 'meus-dados-loen-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.json';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+
+  avisarNaFolha('Arquivo baixado',
+    'Está na pasta de downloads do seu aparelho. Ele tem seus clientes, serviços, ' +
+    'orçamentos e o financeiro do negócio. Guarde em lugar seguro.');
+});
+
 $('#aj-sair').addEventListener('click', async () => {
   await sb.auth.signOut();
   location.reload();
@@ -1473,7 +1502,7 @@ $('#aj-apagar').addEventListener('click', async () => {
   if (prompt('Para confirmar, digite APAGAR em letras maiúsculas:') !== 'APAGAR') return;
 
   const { error } = await sb.rpc('apagar_minha_conta');
-  if (error) return avisarNaFolha('Nao deu certo', escapar(error.message));
+  if (error) return avisarNaFolha('Não deu certo', escapar(mensagemDeErro(error)));
   localStorage.clear();
   location.reload();
 });
@@ -2022,6 +2051,11 @@ $('#form-senha').addEventListener('submit', async (e) => {
   const botao = $('#btn-salvar-senha');
   ocupado(botao, true, 'Trocando…');
 
+  if (await senhaVazada(nova)) {
+    ocupado(botao, false);
+    return aviso('aviso-senha', AVISO_SENHA_VAZADA);
+  }
+
   const { error } = await sb.auth.updateUser({ password: nova });
 
   ocupado(botao, false);
@@ -2207,7 +2241,7 @@ $('#aj-renda').addEventListener('click', async () => {
       'Quanto mais tempo você registrar, mais forte ele fica.');
   } catch (e) {
     console.error('Loen Soluções — comprovante:', e);
-    avisarNaFolha('Não deu certo', escapar(e.message || 'Não consegui gerar o comprovante.'));
+    avisarNaFolha('Não deu certo', escapar(textoDoErro(e, 'Não consegui gerar o comprovante. Tente de novo.')));
   }
 });
 

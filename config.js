@@ -28,13 +28,13 @@ const AMBIENTES = {
   // ---------- HOMOLOGAÇÃO ----------
   // Onde se testa à vontade. Pode quebrar, pode apagar, pode errar.
   //
-  // ENQUANTO ESTIVER VAZIO, o app cai em produção e mostra um aviso
-  // no console — melhor avisar do que apontar para o lugar errado
-  // em silêncio.
+  // Projeto "Loen Soluções - Homologação", criado em 29/09/2026 na
+  // mesma organização, com a estrutura igual à de produção e SEM
+  // nenhum dado real.
   homologacao: {
     nome: 'homologação',
-    SUPABASE_URL: '',
-    SUPABASE_ANON_KEY: ''
+    SUPABASE_URL: 'https://iswndjsgpdiuoxfnnwux.supabase.co',
+    SUPABASE_ANON_KEY: 'sb_publishable_MBbmbg7SmXx7dCaqX4S7Sw_1yD-JO-t'
   }
 };
 
@@ -71,7 +71,11 @@ const CONFIG = {
   // Domínio interno do login por celular. O final .invalid é reservado
   // no mundo todo para endereço que não existe: nenhuma mensagem do
   // sistema consegue cair na caixa de um desconhecido.
-  DOMINIO_CELULAR: 'celular.loen.invalid'
+  DOMINIO_CELULAR: 'celular.loen.invalid',
+
+  // Versão da Política de Privacidade (privacidade.html). Vai junto
+  // com o aceite de cada conta nova. Mudou o texto? Mude a data aqui.
+  VERSAO_PRIVACIDADE: '2026-09-29'
 };
 
 if (usandoProducaoPorFalta) {

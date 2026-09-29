@@ -427,7 +427,7 @@ async function mandarOrcamentoNoWhatsApp(o, c) {
   } catch (e) {
     ocupado(botao, false);
     console.error('Loen Soluções — PDF:', e);
-    aviso('aviso-ver-orcamento', e.message || 'Não consegui gerar o PDF.');
+    aviso('aviso-ver-orcamento', textoDoErro(e, 'Não consegui gerar o PDF. Tente de novo.'));
   }
 }
 
@@ -440,7 +440,7 @@ async function baixarPdf(o, c) {
   } catch (e) {
     ocupado(botao, false);
     console.error('Loen Soluções — PDF:', e);
-    aviso('aviso-ver-orcamento', e.message || 'Não consegui gerar o PDF.');
+    aviso('aviso-ver-orcamento', textoDoErro(e, 'Não consegui gerar o PDF. Tente de novo.'));
   }
 }
 

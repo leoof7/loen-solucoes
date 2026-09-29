@@ -150,6 +150,20 @@ h2 { font-size: 22px; }
 
 .campo .dica { font-size: 14px; color: var(--cinza); margin-top: 6px; }
 
+/* Aceite da Política de Privacidade: a área de toque é a linha toda */
+.aceite {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin: 6px 0 18px; padding: 12px 0; cursor: pointer;
+  font-size: 15px; line-height: 1.45; color: var(--azul);
+}
+.aceite input {
+  width: 22px; height: 22px; flex: none; margin: 0;
+  accent-color: var(--azul);
+}
+.aceite input:focus-visible { outline: 3px solid var(--rosa-forte); outline-offset: 2px; }
+.aceite a { color: var(--rosa-forte); font-weight: 600; }
+.aceite a:focus-visible { outline: 3px solid var(--rosa-forte); outline-offset: 2px; border-radius: 4px; }
+
 .senha-caixa { position: relative; }
 .senha-caixa input { padding-right: 84px; }
 .senha-caixa button {
@@ -376,6 +390,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
   border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
   font-family: inherit; color: var(--azul); cursor: pointer;
 }
+a.item { text-decoration: none; font-size: inherit; }
 .item .corpo { flex: 1; min-width: 0; }
 .item .titulo { font-weight: 600; display: block; }
 .item .sub { font-size: 14px; color: var(--cinza); }

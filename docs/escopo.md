@@ -495,3 +495,56 @@ no topo do `estilo.css` diz o que cada uma é hoje.
 homem nem de mulher", e o site que vende o app já usa a paleta da Loen.
 **Custo aceito:** nomes de variável enganosos até alguém renomear tudo
 de uma vez.
+
+### ADR-015 — Banco de homologação com a estrutura exportada da produção
+**Quando:** 29/09/2026
+**Decisão:** projeto "Loen Soluções - Homologação"
+(`iswndjsgpdiuoxfnnwux`), na mesma organização, criado a partir de
+`docs/migracoes/00-estrutura-completa.sql` — a estrutura inteira lida da
+produção (tabelas, regras de acesso, funções, gatilhos, permissões,
+pastas de fotos), **sem nenhum dado**. O `config.js` aponta para ele
+sempre que o app não está no endereço publicado.
+**Por quê:** as migrações 01 a 04 só existiam dentro do banco; não dava
+para reconstruir, e toda mudança era testada em cima de dados reais.
+**Custo aceito:** o `00` é uma foto de 29/09. Migração nova roda primeiro
+em homologação e depois em produção, e o `00` precisa ser gerado de
+novo de tempos em tempos, com `docs/gerar-estrutura-completa.sql`.
+
+### ADR-016 — Aceite da política de privacidade gravado com a versão
+**Quando:** 29/09/2026
+**Decisão:** cadastro e convite só criam a conta com a caixa "Li e aceito
+a Política de Privacidade" marcada. O app manda a versão
+(`CONFIG.VERSAO_PRIVACIDADE`), e as funções `criar_conta` e
+`aceitar_convite` recusam sem ela e guardam em
+`perfis.versao_privacidade`. A política é `privacidade.html`, escrita só
+com o que o app faz de verdade.
+**Por quê:** o banco gravava "aceitou em tal data" sem existir política
+nem caixa para marcar — um registro falso de consentimento.
+**Custo aceito:** mudou o texto, muda a versão; quem já tem conta precisa
+ser avisado e aceitar de novo (ainda não existe tela para isso).
+
+### ADR-017 — Senha vazada conferida no app, de graça
+**Quando:** 29/09/2026
+**Decisão:** antes de criar ou trocar senha, o app confere na lista
+pública do Have I Been Pwned, mandando só os 5 primeiros caracteres do
+SHA-1 da senha (k-anonimato). Se o serviço não responder em 4 segundos,
+deixa passar.
+**Por quê:** a proteção do próprio Supabase só existe no plano Pro.
+**Custo aceito:** quem chamar a API do Supabase direto, sem o app, pula a
+conferência. Protege a pessoa de boa-fé, que é o caso real. No plano Pro,
+ligar a do Supabase e manter esta como reforço.
+
+### ADR-018 — Backup diário no PC e no OneDrive, não no GitHub
+**Quando:** 29/09/2026
+**Decisão:** o Agendador do Windows roda `backup-agendado.ps1` todo dia
+às 9h (ou quando o PC ligar). Ele copia **todas** as tabelas e os logins
+para `backups\` e para `OneDrive\Backups\Loen Solucoes`, guarda 30 dias e
+deixa um aviso na Área de Trabalho se falhar. O robô do GitHub fica
+desligado.
+**Por quê:** o repositório é público, e em repositório público qualquer
+pessoa logada no GitHub baixa os "artifacts" — o backup com os dados dos
+participantes ficaria exposto. E o script antigo esquecia metade das
+tabelas (orçamentos inclusive).
+**Custo aceito:** depende do PC do Leandro ligar pelo menos de vez em
+quando. A chave secreta fica no cofre do Windows (`.chave-supabase`),
+amarrada à conta dele nesta máquina.

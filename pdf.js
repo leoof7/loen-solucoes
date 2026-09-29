@@ -61,7 +61,7 @@ function nomeDoArquivo(cliente) {
 
 async function montarPdf(o, cliente, itens) {
   if (!window.jspdf?.jsPDF) {
-    throw new Error('A biblioteca do PDF não carregou. Verifique a internet.');
+    throw Object.assign(new Error('O PDF não carregou. Verifique a internet e tente de novo.'), { paraPessoa: true });
   }
 
   const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
@@ -376,7 +376,7 @@ function mesPorExtenso(chave) {
 
 async function gerarComprovanteDeRenda(meses = 6) {
   if (!window.jspdf?.jsPDF) {
-    throw new Error('A biblioteca do PDF não carregou. Verifique a internet.');
+    throw Object.assign(new Error('O PDF não carregou. Verifique a internet e tente de novo.'), { paraPessoa: true });
   }
 
   const r = rendaPorMes(meses);

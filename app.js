@@ -16,7 +16,7 @@
 if (!window.supabase) {
   document.body.innerHTML =
     '<p style="padding:30px;font-family:sans-serif;color:#B3261E">' +
-    'A biblioteca do Supabase não carregou. Verifique a internet e recarregue.</p>';
+    'O app não conseguiu carregar. Verifique a internet e abra de novo.</p>';
   throw new Error('supabase-js não carregou');
 }
 if (typeof CONFIG === 'undefined') {
@@ -131,6 +131,57 @@ function problemaNoEmail(email, repetido) {
   if (email !== repetido) return 'Os dois e-mails não estão iguais. Confira e tente de novo.';
   return null;
 }
+
+
+// ------------------------------------------------------------
+// Senha vazada
+//
+// O Supabase só bloqueia senha vazada no plano pago. Aqui fazemos a
+// mesma conferência, de graça, na lista pública do Have I Been Pwned
+// (a mesma que o Supabase usa): mais de 900 milhões de senhas que já
+// apareceram em vazamentos pelo mundo.
+//
+// A senha NUNCA sai do celular. O app calcula uma "impressão digital"
+// dela (SHA-1) e manda só os 5 primeiros caracteres dessa impressão.
+// O serviço devolve centenas de impressões que começam igual, e a
+// comparação final acontece aqui dentro. Ninguém lá fora fica sabendo
+// qual era a senha.
+//
+// Se o serviço estiver fora do ar, a conta é criada assim mesmo —
+// essa conferência ajuda, mas não pode travar ninguém.
+// ------------------------------------------------------------
+
+async function senhaVazada(senha) {
+  try {
+    const bytes = new TextEncoder().encode(senha);
+    const hash = await crypto.subtle.digest('SHA-1', bytes);
+    const hex = [...new Uint8Array(hash)]
+      .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+    const controle = new AbortController();
+    const prazo = setTimeout(() => controle.abort(), 4000);
+    const r = await fetch('https://api.pwnedpasswords.com/range/' + hex.slice(0, 5), {
+      headers: { 'Add-Padding': 'true' },
+      signal: controle.signal
+    });
+    clearTimeout(prazo);
+    if (!r.ok) return false;
+
+    const resto = hex.slice(5);
+    const texto = await r.text();
+    return texto.split('\n').some(linha => {
+      const [sufixo, vezes] = linha.trim().split(':');
+      return sufixo === resto && Number(vezes) > 0;
+    });
+  } catch {
+    return false;
+  }
+}
+
+const AVISO_SENHA_VAZADA =
+  'Essa senha já apareceu em vazamentos de outros sites e é das primeiras ' +
+  'que um golpista tenta. Escolha outra — uma frase curta que só você ' +
+  'conhece, com espaços, costuma ser fácil de lembrar e difícil de adivinhar.';
 
 
 // ------------------------------------------------------------
@@ -330,7 +381,7 @@ function mensagemDeErro(erro) {
            'Espere uns 15 minutos e tente de novo.';
 
   if (m.includes('could not find the function') || m.includes('schema cache'))
-    return 'O banco de dados ainda não foi atualizado. Rode o arquivo 04-login-por-celular.sql no Supabase.';
+    return 'O app foi atualizado e esta tela ficou para trás. Feche e abra o app de novo.';
   if (m.includes('invalid login'))       return 'Celular, e-mail ou senha não conferem. Tente de novo.';
   if (m.includes('e-mail já usado') ||
       m.includes('perfis_email_recuperacao_unico'))
@@ -347,9 +398,28 @@ function mensagemDeErro(erro) {
   if (m.includes('já foi criada'))       return 'Esta conta já está pronta. É só entrar.';
   if (m.includes('failed to fetch'))     return 'Sem conexão com o servidor. Verifique a internet.';
 
-  // Mensagem técnica para conseguirmos diagnosticar durante os testes.
-  // Trocar por texto amigável antes de abrir para os participantes.
-  return 'Não deu certo. Detalhe técnico: ' + (erro?.message || 'sem mensagem');
+  // Aviso escrito por nós mesmos, dentro do banco (raise exception).
+  // Esses já saem em português e dizem o que fazer, então passam direto.
+  if (erro?.code === 'P0001' && erro.message) return primeiraMaiuscula(erro.message);
+
+  // Qualquer outra coisa é detalhe técnico, quase sempre em inglês.
+  // A pessoa vê um texto claro; o código curto ajuda o suporte a achar
+  // o problema, e o erro completo fica no console para diagnóstico.
+  const codigo = erro?.code || erro?.status;
+  return 'Não deu certo agora. Tente de novo daqui a pouco. Se continuar, ' +
+         'fale com a equipe Loen (Ajustes → Achei um problema no app)' +
+         (codigo ? ' e diga o código ' + String(codigo).slice(0, 12) + '.' : '.');
+}
+
+function primeiraMaiuscula(t) {
+  t = String(t).trim();
+  return t.charAt(0).toUpperCase() + t.slice(1) + (/[.!?]$/.test(t) ? '' : '.');
+}
+
+// Para erros que não vêm do banco (PDF, comprovante): só mostra a
+// mensagem se ela foi escrita por nós, com a marca `paraPessoa`.
+function textoDoErro(e, padrao) {
+  return e?.paraPessoa ? e.message : padrao;
 }
 
 // Mostrar e esconder senha
@@ -537,6 +607,10 @@ $('#form-nova-senha').addEventListener('submit', async (e) => {
 
   const botao = $('#btn-nova-senha');
   ocupado(botao, true, 'Salvando…');
+  if (await senhaVazada(s1)) {
+    ocupado(botao, false);
+    return aviso('aviso-nova-senha', AVISO_SENHA_VAZADA);
+  }
   const { error } = await sb.auth.updateUser({ password: s1 });
   ocupado(botao, false);
 
@@ -588,8 +662,17 @@ $('#form-cadastro').addEventListener('submit', async (e) => {
     if (s1 !== s2) return aviso('aviso-cadastro', 'As duas senhas não estão iguais. Confira e tente de novo.');
   }
 
+  if (!$('#c-privacidade').checked) {
+    return aviso('aviso-cadastro', 'Para criar a conta, marque que leu e aceita a Política de Privacidade.');
+  }
+
   const botao = $('#btn-cadastro');
   ocupado(botao, true, 'Criando sua conta…');
+
+  if (!loginJaCriado && await senhaVazada($('#c-senha').value)) {
+    ocupado(botao, false);
+    return aviso('aviso-cadastro', AVISO_SENHA_VAZADA);
+  }
 
   // Passo A — cria o login, se ainda não existir
   if (!loginJaCriado) {
@@ -604,7 +687,8 @@ $('#form-cadastro').addEventListener('submit', async (e) => {
     if (!data.session) {
       ocupado(botao, false);
       return aviso('aviso-cadastro',
-        'Conta criada, mas a sessão não abriu. Desligue "Confirm email" no Supabase.');
+        'Sua conta foi criada, mas não consegui entrar nela agora. ' +
+        'Toque em "Já tenho conta" e entre com seu celular e senha.');
     }
     loginJaCriado = true;
   }
@@ -618,7 +702,8 @@ $('#form-cadastro').addEventListener('submit', async (e) => {
                            ? ($('#c-outra-atividade').value.trim() || 'Outro')
                            : tipo,
     p_tem_equipe:        temEquipe,
-    p_email_recuperacao: email
+    p_email_recuperacao: email,
+    p_versao_privacidade: CONFIG.VERSAO_PRIVACIDADE
   });
 
   ocupado(botao, false);
@@ -660,8 +745,17 @@ $('#form-convite').addEventListener('submit', async (e) => {
   if (s1.length < 8) return aviso('aviso-convite', 'A senha precisa ter pelo menos 8 caracteres.');
   if (s1 !== s2) return aviso('aviso-convite', 'As duas senhas não estão iguais. Confira e tente de novo.');
 
+  if (!$('#v-privacidade').checked) {
+    return aviso('aviso-convite', 'Para entrar, marque que leu e aceita a Política de Privacidade.');
+  }
+
   const botao = $('#btn-convite');
   ocupado(botao, true, 'Entrando…');
+
+  if (await senhaVazada(s1)) {
+    ocupado(botao, false);
+    return aviso('aviso-convite', AVISO_SENHA_VAZADA);
+  }
 
   const { error: erroCadastro } = await sb.auth.signUp({
     email: loginDoCelular(numero),
@@ -677,7 +771,8 @@ $('#form-convite').addEventListener('submit', async (e) => {
     p_codigo:            $('#v-codigo').value.trim(),
     p_nome:              $('#v-nome').value.trim(),
     p_celular:           $('#v-celular').value.trim(),
-    p_email_recuperacao: email
+    p_email_recuperacao: email,
+    p_versao_privacidade: CONFIG.VERSAO_PRIVACIDADE
   });
 
   ocupado(botao, false);

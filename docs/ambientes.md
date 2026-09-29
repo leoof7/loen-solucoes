@@ -1,168 +1,106 @@
-# Produção e homologação — o guia
+# Produção, homologação e backup — o guia
 
-Escrito em 09/09/2026, quando o Leandro perguntou como subir para
-produção sem perder dados.
+Escrito em 09/09/2026. Reescrito em 29/09/2026, quando a homologação foi
+criada e o backup foi para o computador do Leandro.
 
 ---
 
-## Primeiro, desfazendo uma confusão
+## Os dois bancos
 
-**O banco que existe hoje JÁ É produção.**
+| | Produção | Homologação |
+|---|---|---|
+| Projeto | `rtisqipntpnvlhetfoeb` | `iswndjsgpdiuoxfnnwux` |
+| Nome no Supabase | Loen Soluções | Loen Soluções - Homologação |
+| Dados | reais | só de teste — pode quebrar, pode apagar |
+| Quem usa | `app.loenstudiocriativo.com.br` e `leoof7.github.io` | o app aberto em qualquer outro endereço (localhost, rede local) |
 
-O `rtisqipntpnvlhetfoeb` tem os participantes reais do piloto, e o app
-publicado em `leoof7.github.io` aponta para ele desde o primeiro dia.
+O app escolhe sozinho pelo endereço (`config.js`, função
+`ambienteAtual`). Fora de produção aparece uma **faixa listrada no topo**.
 
-Então não existe "subir o banco para produção" e não há dado nenhum a
-migrar. **Ninguém vai perder nada, porque nada precisa se mover.**
+Os dois ficam na organização "Loen Soluções" (plano grátis: 2 projetos).
 
-O que falta é o contrário: **criar um lugar seguro para testar**, e parar
-de mexer direto no banco onde tem gente trabalhando.
+### Como a homologação foi montada
+
+1. A estrutura inteira da produção foi lida com
+   `docs/gerar-estrutura-completa.sql` e salva em
+   `docs/migracoes/00-estrutura-completa.sql` — tabelas, regras de
+   acesso, funções, gatilhos, permissões e pastas de fotos. **Sem dado
+   nenhum.**
+2. Esse `00` rodou no projeto novo, depois a migração `17`.
+3. As funções `entrar-com-email` e `recuperar-senha` foram publicadas lá
+   também. A `recuperar-senha` só manda e-mail se os segredos
+   `RESEND_API_KEY` e `REMETENTE` forem cadastrados na homologação.
+
+### Ajuste que só dá para fazer no painel
+
+Na homologação: **Authentication → Sign In / Providers → Email →
+desligar "Confirm email"** (igual à produção). Sem isso, o cadastro
+recusa o e-mail interno `...@celular.loen.invalid`.
+
+### A regra daqui em diante
 
 ```
-COMO ESTÁ HOJE                    COMO FICA DEPOIS
-
-    seu computador                    seu computador
-          |                                 |
-          v                                 v
-   [ PRODUÇÃO ]  <- app             [ HOMOLOGAÇÃO ]     [ PRODUÇÃO ] <- app
-   dados reais      publicado        pode quebrar        dados reais
+1. escrevo a migração (arquivo numerado em docs/migracoes/)
+2. roda em HOMOLOGAÇÃO e eu testo o app apontando para lá
+3. deu certo? backup da produção, depois roda em PRODUÇÃO
+4. de tempos em tempos, gerar o 00 de novo
 ```
 
 ---
 
-## Passo 1 — Criar o banco de homologação
+## Backup
 
-**No painel do Supabase:**
+### Como funciona
 
-1. Clique no nome da organização (canto superior esquerdo) → **New project**
-2. Nome: `loen-homologacao`
-3. Região: **South America (São Paulo)** — a mesma da produção
-4. Senha do banco: gere uma e **guarde**. Não é a mesma da produção
-5. Aguarde uns 2 minutos
+O **Agendador de Tarefas do Windows** roda `backup-agendado.ps1` todo dia
+às 9h. Se o PC estiver desligado, roda quando ele ligar.
 
-⚠️ **Atenção ao plano grátis:** ele dá **2 projetos por organização**. Se
-já houver dois, o novo projeto precisa de outra organização — que também
-é grátis.
+- Copia **todas** as tabelas e a lista de logins para `backups\` (na
+  pasta do projeto) e para `OneDrive\Backups\Loen Solucoes` (nuvem).
+- Confere sozinho se apareceu tabela nova que a lista não conhece.
+- Guarda **30 dias** e apaga as cópias mais velhas — só depois de um
+  backup que deu certo. É o que a Política de Privacidade promete.
+- Se falhar, cria o arquivo **"BACKUP LOEN FALHOU - leia.txt"** na Área
+  de Trabalho. O detalhe fica em `backups\ultimo-backup.log`.
 
-**Depois de criado, copie a estrutura para lá:**
+A chave secreta fica no cofre do Windows (`.chave-supabase`), que só a
+conta do Leandro neste PC consegue abrir. Nunca vai para o git.
 
-6. No projeto NOVO, abra o **SQL Editor**
-7. Rode, **nesta ordem**, os arquivos de `docs/migracoes/`: `05`, `06`,
-   `07`, `08`, `09`, `10`, `11`, `12`
-8. As migrações 01 a 04 não existem em arquivo — elas estão descritas em
-   `docs/estrutura-do-banco.json`. Me mande esse arquivo que eu escrevo o
-   SQL de criação a partir dele
+### Ligar pela primeira vez (uma vez só)
 
-**Não copie os dados.** Homologação com dado de participante real é o
-mesmo risco de novo, em outro lugar. Crie duas ou três contas de teste
-lá e trabalhe com elas.
+No PowerShell, dentro da pasta do projeto:
 
-**Por fim, ligue os dois no app:**
+1. `.\guardar-chave.ps1` — cole a chave secreta (Supabase → Project
+   Settings → API Keys → Secret keys → `default` → olho → copiar).
+2. `.\agendar-backup.ps1` — cria a tarefa e já roda o primeiro backup.
 
-9. Em `config.js`, preencha `AMBIENTES.homologacao` com a URL e a chave
-   publicável do projeto novo (Project Settings → API Keys)
+**Se a pasta do projeto mudar de nome ou de lugar, rode
+`.\agendar-backup.ps1` de novo.** A tarefa guarda o caminho.
 
-Pronto. A partir daí:
+### O robô do GitHub fica DESLIGADO
 
-| Onde você abre | Qual banco |
-|---|---|
-| `localhost` | homologação |
-| rede local (`192.168...`) | homologação |
-| `leoof7.github.io` | produção |
-| domínio próprio da Loen | produção |
+`.github/workflows/backup.yml` existe, mas **não deve receber a chave**.
+O repositório é público, e em repositório público qualquer pessoa logada
+no GitHub baixa os arquivos que o robô guarda — seriam os dados dos
+participantes. Para desligar: GitHub → repositório → **Actions** →
+"Backup do banco" → **⋯** → **Disable workflow**.
 
-E fora de produção o app mostra uma **faixa listrada no topo** dizendo
-onde você está. Não dá para confundir.
+### Restaurar
 
----
+Projeto novo → rodar `00-estrutura-completa.sql` e as migrações
+seguintes → recriar os logins com o mesmo `id` a partir do
+`..._logins.json` (a tabela `perfis` depende deles) → rodar o
+`..._dados.sql`. O backup não guarda senha: cada pessoa cria uma nova
+pelo "Esqueci minha senha". **Ainda não foi ensaiado** — ensaiar na
+homologação antes de precisar de verdade.
 
-## Passo 2 — Backup automático
-
-> **Situação em 17/09/2026:** o backup **funcionou** 13 vezes, de 28/08 a
-> 09/09/2026, e **falha desde 10/09** — 8 falhas seguidas. O segredo
-> `SUPABASE_SECRET_KEY` não está mais cadastrado no repositório.
->
-> Some-se a isso que, desde 17/09/2026, **o banco não é mais da conta do
-> Leandro**: foi transferido para `redenarv@gmail.com`. Para religar o
-> backup é preciso uma chave secreta pedida a quem cuida dessa conta.
->
-> Decisão pendente: religar o backup ou desligar a rotina para parar de
-> gerar falha todo dia.
-
-Está pronto em `.github/workflows/backup.yml`. Para ligar:
-
-1. Pegue a chave secreta:
-   Supabase → Project Settings → API Keys → **Secret keys** → `default` →
-   ícone de olho → copiar
-2. Vá em `github.com/leoof7/loen-solucoes` → **Settings** → **Secrets and
-   variables** → **Actions** → **New repository secret**
-3. Nome: `SUPABASE_SECRET_KEY`
-   Valor: a chave que você copiou
-4. **Add secret**
-
-Para testar na hora, sem esperar o horário:
-
-5. Aba **Actions** → "Backup do banco" → **Run workflow**
-6. Quando terminar, o arquivo aparece em **Artifacts**, no fim da página
-
-Depois disso ele roda **todo dia às 6h da manhã**, sozinho.
-
-**Duas coisas importantes:**
-
-- Segredo do GitHub é privado **mesmo em repositório público**. Ele não
-  aparece no log — o GitHub apaga o valor da saída.
-- O backup **nunca** é gravado no repositório. Fica como *artifact*, que
-  só quem tem acesso ao repositório baixa. Se fosse commitado, os dados
-  dos participantes ficariam públicos.
-
-O artifact dura **90 dias** (teto do plano grátis). De vez em quando,
-baixe um e guarde no seu Drive — assim existe cópia fora do GitHub
-também.
+O plano Pro do Supabase (US$ 25/mês) tem backup próprio com restauração
+por botão — vale quando o app tiver gente pagando.
 
 ---
 
-## Passo 3 — O domínio próprio da Loen
+## O domínio
 
-Quando comprar o domínio:
-
-1. No provedor do domínio, aponte para o GitHub Pages
-2. Em `github.com/leoof7/loen-solucoes` → Settings → Pages → **Custom domain** →
-   o domínio da Loen
-3. Marque **Enforce HTTPS**
-
-Depois, acrescente o domínio na lista de endereços de produção do
-`config.js` (função `ambienteAtual`).
-
----
-
-## Como trabalhar daqui em diante
-
-**A regra:** migração nova roda **primeiro** em homologação. Só depois
-de funcionar lá é que vai para produção.
-
-```
-1. escrevo a migração
-2. você roda em HOMOLOGAÇÃO
-3. eu testo o app apontando para lá
-4. deu certo? você roda em PRODUÇÃO
-5. refaz a exportação da estrutura
-```
-
-Hoje pulamos direto para o passo 4, e foi por sorte somada a cuidado que
-nada quebrou. A migração 07, por exemplo, ficou uma semana sem proteger
-nada e ninguém percebeu — em homologação isso teria aparecido no mesmo
-dia.
-
----
-
-## O que continua sem solução
-
-**Restaurar um backup ainda é manual.** Se o banco for perdido, alguém
-precisa criar um projeto novo, rodar as migrações e importar o `.sql`
-gerado. Leva tempo, mas é possível — que é o que importa. Antes de ter o
-backup, não era.
-
-**O plano Free não faz backup por conta própria.** O que montamos aqui
-substitui isso. No plano Pro (US$ 25/mês) existe backup diário do próprio
-Supabase, com restauração por botão — vale a pena quando o piloto virar
-produto de verdade.
+O app está em `app.loenstudiocriativo.com.br` (GitHub Pages, arquivo
+`CNAME`; no Cloudflare, registro CNAME `app` → `leoof7.github.io`, só
+DNS). A página `loenstudiocriativo.com.br/solucoes` leva para ele.

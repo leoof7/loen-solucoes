@@ -24,8 +24,12 @@ const PROJETO = 'rtisqipntpnvlhetfoeb';
 const CHAVE   = process.env.SUPABASE_SECRET_KEY;
 const BASE    = `https://${PROJETO}.supabase.co`;
 
-const TABELAS = ['negocios', 'perfis', 'clientes', 'servicos_catalogo',
-                 'atendimentos', 'lancamentos', 'retiradas', 'convites'];
+// TODAS as tabelas, na ordem em que precisam voltar (quem aponta para
+// outra tabela vem depois dela). Igual à lista do backup.ps1.
+const TABELAS = ['negocios', 'perfis', 'convites', 'clientes', 'servicos_catalogo',
+                 'historico_precos', 'atendimentos', 'orcamentos', 'orcamento_itens',
+                 'lancamentos', 'retiradas', 'checklists', 'checklist_itens',
+                 'atendimento_checklist', 'eventos', 'recuperacoes'];
 
 if (!CHAVE) {
   console.error(`
@@ -88,18 +92,36 @@ async function baixarLogins() {
   return todos;
 }
 
-const valorSql = (v) =>
-    v === null || v === undefined ? 'null'
-  : typeof v === 'number'  ? String(v)
-  : typeof v === 'boolean' ? (v ? 'true' : 'false')
-  : typeof v === 'object'  ? `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`
-  : `'${String(v).replace(/'/g, "''")}'`;
+// O mapa da API diz o tipo de cada coluna (ex.: "text[]", "jsonb").
+async function baixarMapa() {
+  const r = await fetch(`${BASE}/rest/v1/`, { headers: cabecalho });
+  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+const texto = (t) => `'${String(t).replace(/'/g, "''")}'`;
+
+function valorSql(v, formato) {
+  if (v === null || v === undefined) return 'null';
+  if (!formato) formato = Array.isArray(v) ? 'text[]' : typeof v === 'object' ? 'jsonb' : '';
+  // Lista do Postgres: {"a","b"}
+  if (formato.endsWith('[]')) {
+    return texto('{' + v.map(i => '"' + String(i).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"').join(',') + '}');
+  }
+  if (formato.startsWith('json')) return `${texto(JSON.stringify(v))}::jsonb`;
+  if (typeof v === 'number')  return String(v);
+  if (typeof v === 'boolean') return v ? 'true' : 'false';
+  return texto(v);
+}
+
+let mapa = null;
 
 function gerarSql(tabela, linhas) {
   if (!linhas.length) return `-- ${tabela}: vazia\n`;
   const colunas = Object.keys(linhas[0]);
+  const formato = (c) => mapa?.definitions?.[tabela]?.properties?.[c]?.format;
   const valores = linhas
-    .map(l => '  (' + colunas.map(c => valorSql(l[c])).join(', ') + ')')
+    .map(l => '  (' + colunas.map(c => valorSql(l[c], formato(c))).join(', ') + ')')
     .join(',\n');
   return `-- ${tabela}: ${linhas.length} linha(s)\n` +
          `insert into public.${tabela} (${colunas.join(', ')}) values\n${valores}\n` +
@@ -120,6 +142,22 @@ let sqlCompleto = `-- Loen Soluções — dados em ${new Date().toLocaleString('
                   `-- Rode as migracoes de docs/migracoes/ ANTES deste arquivo.\n\n` +
                   `begin;\n\n`;
 let falhou = false;
+
+// Confere se o banco tem tabela que a lista esqueceu. Foi assim que os
+// orçamentos ficaram fora do backup até 29/09/2026.
+try {
+  mapa = await baixarMapa();
+  const noBanco = Object.keys(mapa.paths || {})
+    .filter(p => /^\/[a-z_]+$/.test(p)).map(p => p.slice(1));
+  const esquecidas = noBanco.filter(t => !TABELAS.includes(t));
+  if (esquecidas.length) {
+    falhou = true;
+    console.log(`  Tabela(s) que o backup não conhecia: ${esquecidas.join(', ')} (vão junto desta vez)`);
+    TABELAS.push(...esquecidas);
+  }
+} catch (e) {
+  console.log(`  Não consegui listar as tabelas do banco para conferir: ${e.message.slice(0, 70)}`);
+}
 
 for (const t of TABELAS) {
   try {

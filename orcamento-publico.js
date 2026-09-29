@@ -183,7 +183,12 @@ async function responder(token, resposta) {
     delete sim.dataset.confirmando;
     sim.textContent = 'Aprovar orçamento';
     nao.textContent = 'Não vou fazer agora';
-    aviso.innerHTML = recado('aviso', escapar(error.message || 'Não consegui enviar. Tente de novo.'));
+    // Só mostra o texto do erro se foi escrito por nós no banco (código
+    // P0001, sempre em português). O resto é técnico e em inglês.
+    const texto = error.code === 'P0001' && error.message
+      ? error.message
+      : 'Não consegui enviar sua resposta. Confira a internet e tente de novo.';
+    aviso.innerHTML = recado('aviso', escapar(texto));
     return;
   }
 
