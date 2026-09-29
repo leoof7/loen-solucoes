@@ -1,10 +1,11 @@
 // ============================================================
 // LOEN SOLUÇÕES — Entrada no app
 //
-// A pessoa entra com CELULAR e SENHA.
-// Por baixo, o sistema usa um e-mail gerado a partir do celular,
-// que ela nunca vê e que nunca recebe mensagem.
-// O e-mail de verdade é opcional e serve só para recuperar a conta.
+// A pessoa entra com CELULAR (ou e-mail) e SENHA.
+// Por baixo, o login do Supabase é um e-mail gerado a partir do
+// celular, que ela nunca vê e que nunca recebe mensagem.
+// O e-mail de verdade é obrigatório: é para ele que vai o link de
+// "Esqueci minha senha", e ele também serve para entrar.
 //
 // O cadastro é UMA tela. Serviços, preços e meta mensal
 // ficam para dentro do app, depois que ela já entrou.
@@ -89,6 +90,47 @@ function formatarCelular(campo) {
 }
 
 $$('input[data-celular]').forEach(formatarCelular);
+
+// Campo que aceita celular OU e-mail: só formata como celular enquanto
+// não aparecer letra nem @. Assim quem digita e-mail não vê o texto
+// virar "(ma) ria…".
+function formatarCelularOuEmail(campo) {
+  campo.addEventListener('input', () => {
+    if (/[a-z@]/i.test(campo.value)) return;
+    const d = tirarCodigoPais(campo.value.replace(/\D/g, '')).slice(0, 11);
+    const corte = d.length > 10 ? 7 : 6;
+    let saida = d;
+    if (d.length > 2) saida = '(' + d.slice(0, 2) + ') ' + d.slice(2);
+    if (d.length > 6) saida = '(' + d.slice(0, 2) + ') ' + d.slice(2, corte) + '-' + d.slice(corte);
+    campo.value = saida;
+  });
+}
+
+$$('input[data-celular-ou-email]').forEach(formatarCelularOuEmail);
+
+
+// ------------------------------------------------------------
+// E-mail de verdade
+// ------------------------------------------------------------
+
+// Guardado sempre em minúsculas e sem espaço — o banco faz o mesmo.
+function limparEmail(valor) {
+  return (valor || '').trim().toLowerCase();
+}
+
+// Só confere se tem cara de e-mail. Quem garante que existe é o link
+// de recuperação chegar; por isso o cadastro pede para digitar duas vezes.
+function emailValido(email) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+}
+
+// Devolve o aviso a mostrar, ou null se os dois campos estão certos.
+function problemaNoEmail(email, repetido) {
+  if (!email) return 'Digite seu e-mail. É por ele que você recupera a senha se esquecer.';
+  if (!emailValido(email)) return 'Este e-mail parece incompleto. Confira. Exemplo: nome@gmail.com';
+  if (email !== repetido) return 'Os dois e-mails não estão iguais. Confira e tente de novo.';
+  return null;
+}
 
 
 // ------------------------------------------------------------
@@ -268,7 +310,13 @@ function mensagemDeErro(erro) {
 
   if (m.includes('could not find the function') || m.includes('schema cache'))
     return 'O banco de dados ainda não foi atualizado. Rode o arquivo 04-login-por-celular.sql no Supabase.';
-  if (m.includes('invalid login'))       return 'Celular ou senha não conferem. Tente de novo.';
+  if (m.includes('invalid login'))       return 'Celular, e-mail ou senha não conferem. Tente de novo.';
+  if (m.includes('e-mail já usado') ||
+      m.includes('perfis_email_recuperacao_unico'))
+                                         return 'Este e-mail já está em outra conta. Use outro.';
+  if (m.includes('e-mail inválido'))     return 'Este e-mail parece incompleto. Confira.';
+  if (m.includes('e-mail é obrigatório')) return 'Digite seu e-mail. É por ele que você recupera a senha.';
+  if (m.includes('só a própria pessoa')) return 'Só a própria pessoa pode trocar o e-mail dela.';
   if (m.includes('already registered') ||
       m.includes('already been registered') ||
       m.includes('user already'))        return 'Este celular já tem conta. Toque em "Já tenho conta".';
@@ -322,15 +370,44 @@ $('#form-login').addEventListener('submit', async (e) => {
   e.preventDefault();
   limparAviso('aviso-login');
 
-  const numero = limparCelular($('#login-celular').value);
-  if (!numero) return aviso('aviso-login', 'Digite o celular com DDD. Exemplo: (31) 98842-7315');
-
+  const digitado = $('#login-celular').value.trim();
+  const senha = $('#login-senha').value;
   const botao = $('#btn-entrar');
+
+  // Com @ é e-mail: quem confere é a função entrar-com-email, no
+  // servidor, porque o login interno tem o celular dentro e não pode
+  // vir para o navegador de quem só sabe o e-mail.
+  if (digitado.includes('@')) {
+    const email = limparEmail(digitado);
+    if (!emailValido(email)) return aviso('aviso-login', 'Este e-mail parece incompleto. Confira.');
+
+    ocupado(botao, true, 'Entrando…');
+    const { data, error } = await sb.functions.invoke('entrar-com-email', {
+      body: { email, senha }
+    });
+
+    if (error) {
+      ocupado(botao, false);
+      const status = error.context?.status;
+      if (status === 429) return aviso('aviso-login', mensagemDeErro({ status: 429 }));
+      if (status === 400) return aviso('aviso-login', mensagemDeErro({ message: 'invalid login' }));
+      return aviso('aviso-login', mensagemDeErro(error));
+    }
+
+    const { error: erroSessao } = await sb.auth.setSession(data);
+    ocupado(botao, false);
+    if (erroSessao) return aviso('aviso-login', mensagemDeErro(erroSessao));
+    return depoisDeEntrar();
+  }
+
+  const numero = limparCelular(digitado);
+  if (!numero) return aviso('aviso-login', 'Digite o celular com DDD ou o seu e-mail. Exemplo: (31) 98842-7315');
+
   ocupado(botao, true, 'Entrando…');
 
   const { error } = await sb.auth.signInWithPassword({
     email: loginDoCelular(numero),
-    password: $('#login-senha').value
+    password: senha
   });
 
   ocupado(botao, false);
@@ -338,10 +415,118 @@ $('#form-login').addEventListener('submit', async (e) => {
   await depoisDeEntrar();
 });
 
+
+// ------------------------------------------------------------
+// ESQUECI MINHA SENHA
+//
+// A função recuperar-senha, no servidor, acha a conta e manda o link
+// para o e-mail de verdade. A resposta é sempre a mesma, exista a
+// conta ou não — a tela não pode servir para descobrir quem usa o app.
+// ------------------------------------------------------------
+
+// Endereço do app para onde o link do e-mail vai levar. A função no
+// servidor só aceita os endereços que ela conhece.
+function enderecoDoApp() {
+  return location.origin + location.pathname.replace(/[^/]*$/, '');
+}
+
 $('#btn-recuperar').addEventListener('click', () => {
-  aviso('aviso-login',
-    'Chame a equipe Loen no WhatsApp (31) 97158-9587 para recuperar sua senha. ' +
-    'Tenha em mãos o celular cadastrado.', 'ok');
+  limparAviso('aviso-esqueci');
+  $('#form-esqueci').style.display = '';
+  // Aproveita o que ela já digitou na entrada.
+  $('#es-usuario').value = $('#login-celular').value;
+  abrirFolha('folha-esqueci');
+});
+
+$('#form-esqueci').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  limparAviso('aviso-esqueci');
+
+  const digitado = $('#es-usuario').value.trim();
+  const corpo = { app: enderecoDoApp() };
+
+  if (digitado.includes('@')) {
+    corpo.email = limparEmail(digitado);
+    if (!emailValido(corpo.email)) return aviso('aviso-esqueci', 'Este e-mail parece incompleto. Confira.');
+  } else {
+    corpo.celular = limparCelular(digitado);
+    if (!corpo.celular) return aviso('aviso-esqueci', 'Digite o celular com DDD ou o seu e-mail.');
+  }
+
+  const botao = $('#btn-esqueci');
+  ocupado(botao, true, 'Mandando…');
+  const { error } = await sb.functions.invoke('recuperar-senha', { body: corpo });
+  ocupado(botao, false);
+
+  if (error) {
+    return aviso('aviso-esqueci',
+      'Não consegui mandar agora. Confira a internet e tente de novo daqui a pouco.');
+  }
+
+  $('#form-esqueci').style.display = 'none';
+  aviso('aviso-esqueci',
+    'Pronto. Se existir uma conta com esse ' + (corpo.email ? 'e-mail' : 'celular') +
+    ', mandamos um link para o e-mail cadastrado. Ele chega em alguns minutos — ' +
+    'olhe também a caixa de spam. O link vale por 1 hora.', 'ok');
+});
+
+
+// ------------------------------------------------------------
+// SENHA NOVA — quem chega pelo link do e-mail
+//
+// O link traz um código (?recuperar=...). O app troca o código por
+// uma sessão (verifyOtp), e com ela a pessoa grava a senha nova.
+// ------------------------------------------------------------
+
+async function abrirRecuperacao(codigo) {
+  // Tira o código do endereço na hora: ele só vale uma vez, e não
+  // deve ficar no histórico nem ir junto se ela copiar o endereço.
+  history.replaceState(null, '', location.pathname);
+  irPara('tela-nova-senha');
+
+  // Uma sessão antiga no aparelho confundiria de quem é a senha nova.
+  await sb.auth.signOut({ scope: 'local' });
+
+  const { error } = await sb.auth.verifyOtp({ token_hash: codigo, type: 'recovery' });
+
+  if (error) {
+    $('#nova-senha-texto').textContent =
+      'Este link não vale mais. Ele dura 1 hora e só funciona uma vez.';
+    $('#ns-voltar').style.display = 'block';
+    return;
+  }
+
+  $('#nova-senha-texto').textContent = 'Escolha a senha que você vai usar daqui para frente.';
+  $('#form-nova-senha').style.display = 'block';
+  $('#ns-senha').focus();
+}
+
+$('#ns-voltar').addEventListener('click', () => {
+  irPara('tela-login');
+  $('#btn-recuperar').click();
+});
+
+$('#form-nova-senha').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  limparAviso('aviso-nova-senha');
+
+  const s1 = $('#ns-senha').value, s2 = $('#ns-senha2').value;
+  if (s1.length < 8) return aviso('aviso-nova-senha', 'A senha precisa ter pelo menos 8 caracteres.');
+  if (s1 !== s2) return aviso('aviso-nova-senha', 'As duas senhas não estão iguais. Confira e tente de novo.');
+
+  const botao = $('#btn-nova-senha');
+  ocupado(botao, true, 'Salvando…');
+  const { error } = await sb.auth.updateUser({ password: s1 });
+  ocupado(botao, false);
+
+  if (error) {
+    const m = (error.message || '').toLowerCase();
+    if (m.includes('different from the old'))
+      return aviso('aviso-nova-senha', 'Essa já é a sua senha. Pode entrar com ela, ou escolha outra.');
+    return aviso('aviso-nova-senha', mensagemDeErro(error));
+  }
+
+  await depoisDeEntrar();
 });
 
 
@@ -369,9 +554,13 @@ $('#form-cadastro').addEventListener('submit', async (e) => {
   const numero = limparCelular($('#c-celular').value);
   if (!numero) return aviso('aviso-cadastro', 'Digite o celular com DDD. Exemplo: (31) 98842-7315');
 
-  // Confirmação de senha NÃO é luxo aqui: a recuperação é humana, pelo
-  // WhatsApp da equipe. Quem erra a senha no cadastro e esquece qual
-  // digitou perde a conta.
+  // O e-mail é digitado duas vezes pelo mesmo motivo da senha: é a
+  // única porta de volta se ela esquecer a senha. E-mail digitado
+  // errado é o mesmo que nenhum — o link nunca chega.
+  const email = limparEmail($('#c-email').value);
+  const problemaEmail = problemaNoEmail(email, limparEmail($('#c-email2').value));
+  if (problemaEmail) return aviso('aviso-cadastro', problemaEmail);
+
   if (!loginJaCriado) {
     const s1 = $('#c-senha').value, s2 = $('#c-senha2').value;
     if (s1.length < 8) return aviso('aviso-cadastro', 'A senha precisa ter pelo menos 8 caracteres.');
@@ -408,7 +597,7 @@ $('#form-cadastro').addEventListener('submit', async (e) => {
                            ? ($('#c-outra-atividade').value.trim() || 'Outro')
                            : tipo,
     p_tem_equipe:        temEquipe,
-    p_email_recuperacao: $('#c-email').value.trim() || null
+    p_email_recuperacao: email
   });
 
   ocupado(botao, false);
@@ -442,6 +631,10 @@ $('#form-convite').addEventListener('submit', async (e) => {
   const numero = limparCelular($('#v-celular').value);
   if (!numero) return aviso('aviso-convite', 'Digite o celular com DDD.');
 
+  const email = limparEmail($('#v-email').value);
+  const problemaEmail = problemaNoEmail(email, limparEmail($('#v-email2').value));
+  if (problemaEmail) return aviso('aviso-convite', problemaEmail);
+
   const s1 = $('#v-senha').value, s2 = $('#v-senha2').value;
   if (s1.length < 8) return aviso('aviso-convite', 'A senha precisa ter pelo menos 8 caracteres.');
   if (s1 !== s2) return aviso('aviso-convite', 'As duas senhas não estão iguais. Confira e tente de novo.');
@@ -463,7 +656,7 @@ $('#form-convite').addEventListener('submit', async (e) => {
     p_codigo:            $('#v-codigo').value.trim(),
     p_nome:              $('#v-nome').value.trim(),
     p_celular:           $('#v-celular').value.trim(),
-    p_email_recuperacao: null
+    p_email_recuperacao: email
   });
 
   ocupado(botao, false);
@@ -516,6 +709,10 @@ $$('[data-ir]').forEach(el => {
 // ------------------------------------------------------------
 
 async function iniciar() {
+  // Chegou pelo link de "Esqueci minha senha"?
+  const codigo = new URLSearchParams(location.search).get('recuperar');
+  if (codigo) return abrirRecuperacao(codigo);
+
   const { data } = await sb.auth.getSession();
   if (data.session) await depoisDeEntrar();
 }

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=6">
 </head>
 <body>
 
@@ -26,9 +26,10 @@
 
     <form id="form-login">
       <div class="campo">
-        <label for="login-celular">Celular</label>
-        <input type="tel" id="login-celular" data-celular inputmode="numeric"
-               placeholder="(31) 98842-7315" autocomplete="tel" required>
+        <label for="login-celular">Celular ou e-mail</label>
+        <input type="text" id="login-celular" data-celular-ou-email
+               placeholder="(31) 98842-7315" autocomplete="username"
+               autocapitalize="none" spellcheck="false" required>
       </div>
 
       <div class="campo">
@@ -77,6 +78,19 @@
         <p class="dica">É com este número que você vai entrar no app.</p>
       </div>
 
+      <div class="campo">
+        <label for="c-email">Seu e-mail</label>
+        <input type="email" id="c-email" autocomplete="email" autocapitalize="none"
+               spellcheck="false" placeholder="nome@gmail.com" required>
+        <p class="dica">Se esquecer a senha, mandamos para cá o link para criar outra.</p>
+      </div>
+
+      <div class="campo">
+        <label for="c-email2">Repita o e-mail</label>
+        <input type="email" id="c-email2" autocomplete="off" autocapitalize="none"
+               spellcheck="false" required>
+      </div>
+
       <div class="campo" id="campo-senha">
         <label for="c-senha">Crie uma senha</label>
         <div class="senha-caixa">
@@ -92,7 +106,7 @@
           <input type="password" id="c-senha2" autocomplete="new-password" minlength="8" required>
           <button type="button">mostrar</button>
         </div>
-        <p class="dica">Se errar a senha e esquecer, só a equipe Loen consegue te ajudar.</p>
+        <p class="dica">Se esquecer, você cria outra pelo e-mail que informar aqui.</p>
       </div>
 
       <div class="campo">
@@ -129,12 +143,6 @@
           <div class="campo">
             <label for="c-negocio">Nome do negócio</label>
             <input type="text" id="c-negocio" placeholder="Studio Cida Unhas">
-          </div>
-
-          <div class="campo">
-            <label for="c-email">E-mail</label>
-            <input type="email" id="c-email" autocomplete="email" placeholder="para recuperar a conta">
-            <p class="dica">Sem e-mail, a recuperação de senha é feita pela equipe Loen no WhatsApp.</p>
           </div>
         </div>
       </details>
@@ -176,6 +184,19 @@
       </div>
 
       <div class="campo">
+        <label for="v-email">Seu e-mail</label>
+        <input type="email" id="v-email" autocomplete="email" autocapitalize="none"
+               spellcheck="false" placeholder="nome@gmail.com" required>
+        <p class="dica">Se esquecer a senha, mandamos para cá o link para criar outra.</p>
+      </div>
+
+      <div class="campo">
+        <label for="v-email2">Repita o e-mail</label>
+        <input type="email" id="v-email2" autocomplete="off" autocapitalize="none"
+               spellcheck="false" required>
+      </div>
+
+      <div class="campo">
         <label for="v-senha">Crie uma senha</label>
         <div class="senha-caixa">
           <input type="password" id="v-senha" autocomplete="new-password" minlength="8" required>
@@ -193,6 +214,38 @@
 
       <button class="btn btn-principal" id="btn-convite" type="submit">Entrar na equipe</button>
     </form>
+  </section>
+
+
+  <!-- ========== SENHA NOVA (aberta pelo link do e-mail) ========== -->
+  <section class="tela" id="tela-nova-senha">
+    <h1>Crie uma senha nova</h1>
+    <p style="color:#5A6472;margin:10px 0 0" id="nova-senha-texto">
+      Conferindo o link…
+    </p>
+
+    <div class="aviso" id="aviso-nova-senha" style="margin-top:20px"></div>
+
+    <form id="form-nova-senha" style="margin-top:20px;display:none">
+      <div class="campo">
+        <label for="ns-senha">Senha nova</label>
+        <div class="senha-caixa">
+          <input type="password" id="ns-senha" autocomplete="new-password" minlength="8" required>
+          <button type="button">mostrar</button>
+        </div>
+        <p class="dica">No mínimo 8 caracteres.</p>
+      </div>
+      <div class="campo">
+        <label for="ns-senha2">Repita a senha nova</label>
+        <div class="senha-caixa">
+          <input type="password" id="ns-senha2" autocomplete="new-password" minlength="8" required>
+          <button type="button">mostrar</button>
+        </div>
+      </div>
+      <button class="btn btn-principal" id="btn-nova-senha" type="submit">Salvar e entrar</button>
+    </form>
+
+    <button class="btn-texto" id="ns-voltar" type="button" style="display:none">Voltar para a entrada</button>
   </section>
 
 
@@ -558,6 +611,60 @@
 </div>
 
 
+<!-- ========== FOLHA: ESQUECI MINHA SENHA ========== -->
+<div class="folha cheia" id="folha-esqueci">
+  <div class="painel-folha">
+    <div class="linha-topo">
+      <button class="voltar" data-fecha="folha-esqueci" type="button">‹</button>
+      <h3>Esqueci minha senha</h3>
+    </div>
+    <div class="aviso" id="aviso-esqueci"></div>
+    <form id="form-esqueci">
+      <p style="color:#5A6472;margin:0 0 18px;line-height:1.5">
+        Digite o celular ou o e-mail da sua conta. Mandamos um link para o
+        seu e-mail, e por ele você cria uma senha nova.
+      </p>
+      <div class="campo">
+        <label for="es-usuario">Celular ou e-mail</label>
+        <input type="text" id="es-usuario" data-celular-ou-email
+               placeholder="(31) 98842-7315" autocomplete="username"
+               autocapitalize="none" spellcheck="false" required>
+      </div>
+      <button class="btn btn-principal" id="btn-esqueci" type="submit">Mandar o link</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- ========== FOLHA: MEU E-MAIL ========== -->
+<div class="folha cheia" id="folha-email">
+  <div class="painel-folha">
+    <div class="linha-topo">
+      <button class="voltar" id="em-voltar" data-fecha="folha-email" type="button">‹</button>
+      <h3>Meu e-mail</h3>
+    </div>
+    <p style="color:#5A6472;margin:0 0 18px;line-height:1.5" id="em-texto">
+      É para este e-mail que mandamos o link se você esquecer a senha.
+      Também dá para entrar no app com ele.
+    </p>
+    <div class="aviso" id="aviso-email"></div>
+    <form id="form-email">
+      <div class="campo">
+        <label for="em-email">E-mail</label>
+        <input type="email" id="em-email" autocomplete="email" autocapitalize="none"
+               spellcheck="false" placeholder="nome@gmail.com" required>
+      </div>
+      <div class="campo">
+        <label for="em-email2">Repita o e-mail</label>
+        <input type="email" id="em-email2" autocomplete="off" autocapitalize="none"
+               spellcheck="false" required>
+      </div>
+      <button class="btn btn-principal" id="btn-salvar-email" type="submit">Salvar e-mail</button>
+    </form>
+  </div>
+</div>
+
+
 <!-- ========== FOLHA: TROCAR SENHA ========== -->
 <div class="folha cheia" id="folha-senha">
   <div class="painel-folha">
@@ -581,7 +688,7 @@
           <input type="password" id="sn-confirma" autocomplete="new-password" minlength="8" required>
           <button type="button">mostrar</button>
         </div>
-        <p class="dica">Se errar a senha e esquecer, só a equipe Loen consegue te ajudar.</p>
+        <p class="dica">Se esquecer, dá para criar outra pelo seu e-mail, em "Esqueci minha senha".</p>
       </div>
       <button class="btn btn-principal" id="btn-salvar-senha" type="submit">Trocar senha</button>
     </form>
@@ -845,6 +952,9 @@
       <span class="sub">Para alugar, financiar ou abrir MEI</span></div><div class="direita">›</div></button>
 
     <p class="secao-titulo">Conta</p>
+    <button class="item" id="aj-email"><div class="corpo">
+      <span class="titulo">Meu e-mail</span>
+      <span class="sub" id="aj-email-atual"></span></div><div class="direita">›</div></button>
     <button class="item" id="aj-senha"><div class="corpo">
       <span class="titulo">Trocar minha senha</span>
       <span class="sub">Você precisa saber a senha de agora</span></div><div class="direita">›</div></button>
@@ -924,11 +1034,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="config.js?v=5"></script>
-<script src="app.js?v=5"></script>
-<script src="painel.js?v=5"></script>
-<script src="orcamentos.js?v=5"></script>
-<script src="calculadora.js?v=5"></script>
-<script src="pdf.js?v=5"></script>
+<script src="config.js?v=6"></script>
+<script src="app.js?v=6"></script>
+<script src="painel.js?v=6"></script>
+<script src="orcamentos.js?v=6"></script>
+<script src="calculadora.js?v=6"></script>
+<script src="pdf.js?v=6"></script>
 </body>
 </html>

@@ -1,8 +1,10 @@
-# NARV — Escopo
+# Loen Soluções — Escopo
+
+Antes se chamava NARV. Trocado em 28/09/2026.
 
 Última atualização: 08/09/2026
 
-Este documento é a fonte da verdade sobre o que o NARV é e o que ele não é.
+Este documento é a fonte da verdade sobre o que o Loen Soluções é e o que ele não é.
 Ideia nova não entra no meio de uma sessão — vira item de "Próxima fase"
 aqui, e é discutida depois.
 
@@ -10,27 +12,31 @@ aqui, e é discutida depois.
 
 ## Em andamento — decidido em 28/09/2026
 
-O app passa a se chamar **Loen Soluções**. Nada de "Narv" no que a pessoa
-vê. O papagaio saiu da tela de entrada; o logo da Loen vem depois.
+O app passa a se chamar **Loen Soluções**. Nada do nome antigo em lugar
+nenhum — tela, documento, repositório, pasta ou login interno. O papagaio
+saiu da tela de entrada; o logo da Loen vem depois.
+
+O app ainda não tem ninguém usando: as contas que existem são de teste e
+serão apagadas antes de ir ao ar.
 
 A recuperação de senha **saiu do congelado** e vira autosserviço por
 e-mail, sem WhatsApp. Ordem, uma tarefa por vez:
 
 1. ~~Trocar o nome visível e tirar o papagaio~~ — feito em 28/09
-2. E-mail obrigatório para todo mundo (cadastro, convite e contas antigas)
-3. "Esqueci minha senha": função no servidor que manda o link pelo Resend
-   para o e-mail de verdade, e tela de nova senha
-4. Entrar com celular **ou** e-mail
+2. ~~E-mail obrigatório para todo mundo (cadastro, convite e contas antigas)~~ — feito em 28/09
+3. ~~"Esqueci minha senha": função no servidor que manda o link pelo Resend
+   para o e-mail de verdade, e tela de nova senha~~ — feito em 28/09 (ADR-011)
+4. ~~Entrar com celular **ou** e-mail~~ — feito em 28/09
+5. Ligar o app em `app.loenstudiocriativo.com.br` e apontar os botões de
+   `loenstudiocriativo.com.br/solucoes` para ele
 
 O WhatsApp (31) 97158-9587 fica só no botão de suporte ("Achei um problema
-no app"). O texto antigo de recuperação pelo WhatsApp continua até a
-tarefa 3 ficar pronta, para ninguém ficar sem saída no meio do caminho.
+no app").
 
-Ficam como estão, por decisão técnica: o domínio interno do login
-(`celular.kitnarv.app`) — invisível, e trocar exige reescrever o login de
-todas as contas em produção — e o nome do repositório, que muda o endereço
-do app e quebra links já enviados. Esse último vai junto quando a Loen
-tiver domínio próprio.
+Também trocados, porque ninguém usa o app ainda e não haverá momento
+melhor: o domínio interno do login (agora `celular.loen.invalid`, ver
+ADR-010), o repositório (`leoof7/loen-solucoes`) e a pasta no PC. As
+contas de teste antigas, com o domínio velho, deixam de entrar.
 
 ---
 
@@ -48,7 +54,7 @@ o produto foi desenhado aconteceu no claude.ai e não foi preservada.
 | 30/08 (local) | Cinco correções feitas mas **ainda não publicadas** no GitHub. |
 
 Onde está publicado: `leoof7.github.io` (GitHub Pages, a partir do
-repositório `leoof7/NARV`, público).
+repositório `leoof7/loen-solucoes`, público).
 
 ---
 
@@ -56,7 +62,8 @@ repositório `leoof7/NARV`, público).
 
 **Entrada**
 Login com celular e senha. Criar conta em uma tela. Entrar na equipe com
-código de convite. Recuperação de senha pelo WhatsApp da equipe Narv.
+código de convite. Entrar também pelo e-mail. Recuperação de senha pelo
+próprio app, com link no e-mail (ADR-011).
 
 **Início**
 Tutorial de três passos que some sozinho quando as tarefas são feitas. Saldo
@@ -295,7 +302,8 @@ quando o app passar de umas 3.000 linhas.
 ### ADR-002 — Login por celular com e-mail fabricado
 **Quando:** 30/08/2026
 **Decisão:** a pessoa entra com celular e senha. O sistema fabrica
-`c55DDNNNNNNNNN@celular.kitnarv.app` para satisfazer o Supabase Auth, que
+`c55DDNNNNNNNNN@celular.<domínio interno>` (hoje `celular.loen.invalid`,
+ver ADR-010) para satisfazer o Supabase Auth, que
 exige e-mail. E-mail de verdade é opcional, só para recuperação.
 **Por quê:** o público não usa e-mail. Pedir e-mail derrubaria o cadastro.
 **Custo aceito:** recuperação de senha vira trabalho manual pelo WhatsApp
@@ -384,3 +392,45 @@ contexto obriga a equipe a adivinhar o que aconteceu.
 **Custo aceito:** a folha de aviso ficou com um botão a mais para
 gerenciar, e `avisarNaFolha` precisa esconder o "Cancelar" que só faz
 sentido em pergunta.
+
+### ADR-010 — Domínio interno do login termina em `.invalid`
+**Quando:** 28/09/2026
+**Decisão:** o login fabricado passa de `c55...@celular.kitnarv.app` para
+`c55...@celular.loen.invalid`. O domínio fica em `config.js`
+(`DOMINIO_CELULAR`) e na função `recuperar-senha` — os dois precisam ser
+iguais.
+**Por quê:** o app mudou de nome e ainda não tinha ninguém usando, então
+não havia momento mais barato para trocar. O final `.invalid` é reservado
+no mundo todo (RFC 2606) para endereço que não existe: com o Resend ligado
+como SMTP do Supabase, nenhuma mensagem automática do sistema consegue
+cair na caixa de um desconhecido dono de um domínio parecido.
+**Custo aceito:** as contas de teste antigas, com o domínio velho, não
+entram mais. Serão apagadas antes de ir ao ar. Daqui para frente este
+domínio **não muda nunca** — trocar exigiria reescrever o login de todas as
+contas.
+
+### ADR-011 — Recuperação de senha por e-mail, sem mexer no login
+**Quando:** 28/09/2026. Substitui o "custo aceito" do ADR-002.
+**Decisão:** o e-mail de verdade é obrigatório e fica em
+`perfis.email_recuperacao`, nunca no login do Supabase. Duas funções no
+servidor fazem a ponte:
+- `recuperar-senha` — recebe celular ou e-mail, acha a conta, gera o link
+  com o admin do Supabase e manda pelo Resend. Responde sempre igual,
+  exista a conta ou não. No máximo 3 links por conta por hora
+  (tabela `recuperacoes`). O link só pode levar aos endereços do app que
+  a função conhece.
+- `entrar-com-email` — deixa entrar pelo e-mail. Fica no servidor porque o
+  login interno contém o celular: se fosse para o navegador, quem soubesse
+  um e-mail descobriria o celular do dono.
+
+A migração 14 põe as regras no banco: e-mail único, sempre minúsculo, com
+formato válido, e **só a própria pessoa troca o próprio e-mail** — sem
+isso o dono, que pode editar o perfil da equipe, poria o e-mail dele no
+perfil de um funcionário e tomaria a conta pelo link.
+**Por quê:** o público perdia a conta se esquecesse a senha, e a saída
+pelo WhatsApp dependia de uma pessoa da equipe disponível.
+**Custo aceito:** o cadastro ficou com dois campos a mais (e-mail e
+repetição). Entrar pelo e-mail passa por uma função a mais, e o limite de
+tentativas de login do Supabase é contado pelo endereço do servidor dela,
+não de quem digita — se o app crescer muito, subir esse limite em
+Authentication → Rate Limits.

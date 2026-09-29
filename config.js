@@ -47,10 +47,8 @@ function ambienteAtual() {
   const host = location.hostname;
 
   const ehProducao =
-    host === 'leoof7.github.io' ||
-    host === 'narv.app' ||
-    host === 'www.narv.app' ||
-    host.endsWith('.narv.app');
+    host === 'app.loenstudiocriativo.com.br' ||
+    host === 'leoof7.github.io';
 
   return ehProducao ? 'producao' : 'homologacao';
 }
@@ -70,8 +68,10 @@ const CONFIG = {
   SUPABASE_URL: efetivo.SUPABASE_URL,
   SUPABASE_ANON_KEY: efetivo.SUPABASE_ANON_KEY,
 
-  // Domínio interno do login por celular. Nunca recebe e-mail de verdade.
-  DOMINIO_CELULAR: 'celular.kitnarv.app'
+  // Domínio interno do login por celular. O final .invalid é reservado
+  // no mundo todo para endereço que não existe: nenhuma mensagem do
+  // sistema consegue cair na caixa de um desconhecido.
+  DOMINIO_CELULAR: 'celular.loen.invalid'
 };
 
 if (usandoProducaoPorFalta) {

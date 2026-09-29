@@ -154,7 +154,7 @@ async function carregarTudo() {
   // confere o papel antes de responder.
   const { data: perfil, error: erroPerfil } = await sb
     .from('perfis')
-    .select('id, nome, papel, celular, foto_caminho, negocio_id, ' +
+    .select('id, nome, papel, celular, foto_caminho, negocio_id, email_recuperacao, ' +
             'negocios(id, nome, tipo_atividade, tem_equipe, logo_caminho, ' +
             'cnpj, site, instagram, endereco, email)')
     .eq('id', id)
@@ -328,7 +328,9 @@ $$('[data-fecha]').forEach(b => {
 });
 
 $$('.folha').forEach(f => {
-  f.addEventListener('click', (e) => { if (e.target === f) f.classList.remove('aberta'); });
+  // Folha travada (data-travada) não fecha tocando fora: é o caso do
+  // e-mail obrigatório para quem ainda não tem.
+  f.addEventListener('click', (e) => { if (e.target === f && !f.dataset.travada) f.classList.remove('aberta'); });
 });
 
 
@@ -1343,6 +1345,7 @@ $('#avatar').addEventListener('click', () => {
   $('#aj-papel').textContent = estado.perfil.papel === 'dono' ? 'Dono do negócio' : 'Profissional';
   $('#aj-negocio').textContent = estado.negocio?.nome || estado.negocio?.tipo_atividade || '';
   $('#aj-qtd-servicos').textContent = estado.catalogo.length + ' cadastrado(s)';
+  $('#aj-email-atual').textContent = estado.perfil.email_recuperacao || 'Nenhum — cadastre para recuperar a senha';
   abrirFolha('folha-ajustes');
 });
 
@@ -1665,8 +1668,9 @@ async function abrirApp() {
   // quando isto mais importa: é a primeira coisa que ela vê no dia.
   if (typeof vencerOsVencidos === 'function') await vencerOsVencidos();
 
-  $$('.tela').forEach(t => t.classList.remove('ativa'));
-  $('.app').style.display = 'none';   // some com a área de login, senão sobra espaço em branco
+  $('.tela').forEach(t => t.classList.remove('ativa'));
+  $('.app').style.display = 'none';
+  pedirEmailSeFaltar();   // some com a área de login, senão sobra espaço em branco
   $('#painel').classList.add('ativo');
   abrirAba('inicio');
   registrar('entrou');
@@ -1915,10 +1919,8 @@ async function ofereceLancarEntrada(a) {
 // Conta: senha, aparelhos e falar com a equipe
 // ------------------------------------------------------------
 
-// Trocar a senha só funciona para quem está logado — ou seja, para quem
-// LEMBRA a senha atual. Quem esqueceu continua dependendo da equipe Loen
-// no WhatsApp, porque o login é por celular e o e-mail do Supabase é
-// fabricado. Isso está registrado como próxima fase.
+// Trocar a senha aqui é para quem está logado. Quem esqueceu usa
+// "Esqueci minha senha" na entrada, que manda o link para o e-mail.
 $('#aj-senha').addEventListener('click', () => {
   fecharFolha('folha-ajustes');
   $('#sn-nova').value = '';
@@ -1951,6 +1953,68 @@ $('#form-senha').addEventListener('submit', async (e) => {
   fecharFolha('folha-senha');
   avisarNaFolha('Senha trocada',
     'Da próxima vez que entrar, use a senha nova. Guarde ela em lugar seguro.');
+});
+
+// ------------------------------------------------------------
+// Meu e-mail — a porta de volta se esquecer a senha
+//
+// Toda conta precisa ter. Quem não tem (conta criada antes do e-mail
+// virar obrigatório) vê esta folha ao entrar, travada: sem voltar e
+// sem fechar tocando fora, até salvar.
+// ------------------------------------------------------------
+
+function abrirFolhaEmail(obrigatorio) {
+  const folha = $('#folha-email');
+  if (obrigatorio) folha.dataset.travada = '1';
+  else delete folha.dataset.travada;
+
+  $('#em-voltar').style.visibility = obrigatorio ? 'hidden' : 'visible';
+  $('#em-texto').textContent = obrigatorio
+    ? 'Antes de continuar, cadastre seu e-mail. Se um dia esquecer a senha, ' +
+      'é para ele que mandamos o link para criar outra.'
+    : 'É para este e-mail que mandamos o link se você esquecer a senha. ' +
+      'Também dá para entrar no app com ele.';
+
+  $('#em-email').value = estado.perfil?.email_recuperacao || '';
+  $('#em-email2').value = '';
+  limparAviso('aviso-email');
+  abrirFolha('folha-email');
+}
+
+function pedirEmailSeFaltar() {
+  if (!estado.perfil?.email_recuperacao) abrirFolhaEmail(true);
+}
+
+$('#aj-email').addEventListener('click', () => {
+  fecharFolha('folha-ajustes');
+  abrirFolhaEmail(false);
+});
+
+$('#form-email').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  limparAviso('aviso-email');
+
+  const email = limparEmail($('#em-email').value);
+  const problema = problemaNoEmail(email, limparEmail($('#em-email2').value));
+  if (problema) return aviso('aviso-email', problema);
+
+  const botao = $('#btn-salvar-email');
+  ocupado(botao, true, 'Salvando…');
+  // O banco confere o formato, a repetição em outra conta e se é a
+  // própria pessoa trocando (migração 14).
+  const { error } = await sb.from('perfis')
+    .update({ email_recuperacao: email })
+    .eq('id', estado.perfil.id);
+  ocupado(botao, false);
+
+  if (error) return aviso('aviso-email', mensagemDeErro(error));
+
+  estado.perfil.email_recuperacao = email;
+  delete $('#folha-email').dataset.travada;
+  fecharFolha('folha-email');
+  avisarNaFolha('E-mail salvo',
+    'Se esquecer a senha, toque em "Esqueci minha senha" na entrada ' +
+    'e mandamos o link para ' + escapar(email) + '.');
 });
 
 // Sair de todos os aparelhos é o que salva quem perdeu o celular:
