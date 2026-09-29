@@ -64,8 +64,23 @@ financeiro do negócio. A regra vive no banco (RLS); o app só evita pedir.
 **Todo dinheiro que sai, sai do saldo.** Saída do negócio, saída pessoal e
 retirada baixam o caixa igual — porque no mundo real o dinheiro saiu da
 carteira dela nos três casos. O rótulo "pessoal" existe só para ela ver na
-lista, não muda conta nenhuma. Saída pessoal e retirada contam igual na meta.
-(Decidido em 30/08/2026. Ver ADR-004 no escopo.)
+lista, não muda conta nenhuma. (Decidido em 30/08/2026. Ver ADR-004 no escopo.)
+
+**A meta mensal mede o que ENTROU no mês.** "Entrou R$ 28 mil de R$ 50 mil".
+Antes media só as retiradas, e a barra ficava parada mesmo com dinheiro
+entrando — ninguém entendia. (Decidido em 29/09/2026. Ver ADR-012.)
+
+**Visual é o da Loen.** Fundo cinza bem claro, tinta preta, destaques lima,
+lilás, céu e laranja, fontes Montserrat Alternates e Hanken Grotesk — o
+mesmo do site que apresenta o app. Nada de rosa. O Início segue o desenho
+da página `loenstudiocriativo.com.br/solucoes`.
+
+**Valor em dinheiro se digita só com números.** A vírgula e o ponto
+aparecem sozinhos (5 → 0,05 → 5.000,00), como nos apps de banco. Só nos
+campos marcados `data-reais`; quantidade e porcentagem ficam livres.
+
+**Exemplo dentro de campo sai da profissão da pessoa**, da lista
+`SERVICOS_SUGERIDOS` — nunca um exemplo de um ofício só.
 
 ## Como este produto foge do padrão da Lesete
 

@@ -27,8 +27,37 @@ e-mail, sem WhatsApp. Ordem, uma tarefa por vez:
 3. ~~"Esqueci minha senha": função no servidor que manda o link pelo Resend
    para o e-mail de verdade, e tela de nova senha~~ — feito em 28/09 (ADR-011)
 4. ~~Entrar com celular **ou** e-mail~~ — feito em 28/09
-5. Ligar o app em `app.loenstudiocriativo.com.br` e apontar os botões de
-   `loenstudiocriativo.com.br/solucoes` para ele
+5. ~~Ligar o app em `app.loenstudiocriativo.com.br` e apontar os botões de
+   `loenstudiocriativo.com.br/solucoes` para ele~~ — feito em 29/09
+   ("Criar conta" abre direto no cadastro, pelo final `#criar-conta`)
+
+## Entregue em 29/09/2026 — pedidos do Leandro depois de testar
+
+Entrou mesmo estando fora do escopo congelado, a pedido do dono.
+
+- **Visual da Loen** no app e na página do cliente; sai o rosa (ADR-014)
+- **Início igual ao desenho do site**: "Olá, nome", Entrou, Saiu, Hoje,
+  orçamentos aguardando resposta; meta, saldo e a receber logo abaixo
+- **Meta mede o que entrou** (ADR-012)
+- **Aba Agenda própria** e "Agendar um serviço" no menu + (ADR-013). O
+  menu + segue a ordem das abas
+- **Dinheiro com vírgula e ponto automáticos** em todos os campos de valor
+- **Exemplos dos campos pela profissão** da pessoa
+- **"Cadastrar um serviço novo"** direto do registro de serviço
+- **Orçamento — defeitos corrigidos:** o "Aprovar" do cliente não
+  funcionava dentro do WhatsApp/Instagram (caixa `confirm` bloqueada);
+  a grade "Em que pé está?" duplicava; a tela reabria depois de salvar
+  pela calculadora; a página do cliente repetia a profissão e prometia
+  "já avisamos" sem existir aviso
+- **Resposta do cliente com data e hora** ("Aprovado pelo cliente em
+  29/09/2026 às 00:52") na lista e no orçamento (migração 16)
+- Serviço cadastrado sem preço era gravado como R$ 0,00
+- **Site:** carrossel de marcas, projetos com imagem, botão laranja,
+  print de verdade do app na página Soluções, textos de e-mail corrigidos
+
+A conta de teste do Leandro tem **dados de exemplo** (5 clientes, 4
+serviços, lançamentos, agenda e orçamentos), cadastrados para o print do
+site. Apagar antes de ir ao ar.
 
 O WhatsApp (31) 97158-9587 fica só no botão de suporte ("Achei um problema
 no app").
@@ -434,3 +463,35 @@ repetição). Entrar pelo e-mail passa por uma função a mais, e o limite de
 tentativas de login do Supabase é contado pelo endereço do servidor dela,
 não de quem digita — se o app crescer muito, subir esse limite em
 Authentication → Rate Limits.
+
+### ADR-012 — A meta mensal mede o que entrou
+**Quando:** 29/09/2026. Muda a parte do ADR-004 que tratava da meta.
+**Decisão:** a barra da meta compara o que ENTROU no mês com a meta
+("R$ 28.643 de R$ 50.000"). A pergunta continua "quanto você quer
+receber por mês".
+**Por quê:** a meta media só retiradas e saídas pessoais. O Leandro
+registrou R$ 3.000 de entrada e a barra ficou em zero — para quem usa, a
+meta é o dinheiro entrando, não o dinheiro saindo para ela.
+**Custo aceito:** a meta deixa de mostrar se o negócio "consegue pagar"
+o que ela tira. O saldo e o resumo do Financeiro continuam mostrando isso.
+
+### ADR-013 — Agenda vira aba própria
+**Quando:** 29/09/2026. Substitui o ADR-006.
+**Decisão:** seis abas embaixo — Início, Agenda, Serviços, Orçamentos,
+Clientes, Financeiro. A Agenda tem lista e mês, e o botão "Agendar um
+serviço". O menu + segue a mesma ordem das abas.
+**Por quê:** dentro de Serviços, ninguém achava a agenda.
+**Custo aceito:** seis abas num celular de 375 px — rótulo com 10,5 px.
+Se ficar apertado demais no uso real, a próxima troca é juntar Serviços
+dentro da Agenda.
+
+### ADR-014 — Visual da Loen no app
+**Quando:** 29/09/2026
+**Decisão:** paleta e fontes do manual da Loen (as mesmas do site). As
+variáveis do CSS mantiveram os nomes antigos (`--azul` é a tinta preta,
+`--rosa` é o lilás) para não reescrever o arquivo inteiro; o comentário
+no topo do `estilo.css` diz o que cada uma é hoje.
+**Por quê:** o app era rosa e azul da Narv; o dono pediu uma cor "nem de
+homem nem de mulher", e o site que vende o app já usa a paleta da Loen.
+**Custo aceito:** nomes de variável enganosos até alguém renomear tudo
+de uma vez.
