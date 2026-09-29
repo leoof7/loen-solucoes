@@ -2,25 +2,36 @@
    LOEN SOLUÇÕES — Sistema visual
    ============================================================ */
 
-/* ---------- paleta de cores (herdada; troca junto com o logo da Loen) ----------
-   Tirada do manual: o papagaio e os fundos oficiais.
-   Os tons de dinheiro (verde, laranja, vermelho) são os da marca
-   escurecidos até passarem no contraste sobre fundo claro — o
-   amarelo e o rosa da logo são lindos, mas ilegíveis como texto. */
+/* ---------- paleta de cores: a da Loen (29/09/2026) ----------
+   Fundo cinza bem claro e tinta preta, com os destaques do manual da
+   Loen (lima, lilás, céu, laranja) — o mesmo visual do site que
+   apresenta o app. Nem "de homem" nem "de mulher", pedido do Leandro.
+
+   Os NOMES das variáveis ficaram os antigos (--azul, --rosa…) para não
+   mexer em centenas de linhas; o que vale é o comentário de cada uma.
+   Cor de dinheiro (verde, laranja, vermelho) é escurecida até passar
+   no contraste como texto sobre fundo claro. Lima, lilás e céu são
+   só para FUNDO — como texto ficam ilegíveis. */
 :root {
-  --azul:       #1E3F91;   /* azul do corpo do papagaio — cor principal */
-  --azul-fundo: #0A2260;   /* azul-marinho dos fundos da marca */
-  --verde:      #17593A;   /* verde do topete — entradas */
-  --amarelo:    #F9B32B;   /* amarelo do bico e da asa */
-  --laranja:    #F5851F;   /* laranja da asa — a receber */
+  --azul:       #111111;   /* tinta principal: texto, botão principal */
+  --azul-fundo: #000000;   /* cartão de destaque (saldo) */
+  --verde:      #17593A;   /* entradas */
+  --amarelo:    #E9FA4C;   /* lima da Loen — só fundo e detalhe */
+  --laranja:    #C43D08;   /* laranja da Loen escurecido — a receber */
   --vermelho:   #A31208;   /* saída — dinheiro que saiu do caixa */
-  --rosa:       #F09CC4;   /* rosa da bochecha — fundo e detalhe */
-  --rosa-forte: #D9569A;   /* o mesmo rosa, legível como texto */
-  --creme:      #F7EDE8;   /* creme dos fundos da marca */
+  --rosa:       #C3ABFF;   /* lilás da Loen — só fundo e detalhe */
+  --rosa-forte: #5B3FC4;   /* o mesmo lilás, legível como texto */
+  --creme:      #F7F7F7;   /* fundo do app */
   --branco:     #FFFFFF;
-  --cinza:      #5A6472;
-  --borda:      #E7DCD6;
+  --cinza:      #4A4A4A;   /* texto secundário */
+  --borda:      #E3E3E3;
   --erro:       #B3261E;
+
+  /* Destaques da tela de início (iguais ao site) */
+  --lima:       #E9FA4C;
+  --lilas:      #C3ABFF;
+  --ceu:        #95BFF1;
+  --laranja-loen: #F35204;
 
   --raio: 16px;
   --toque: 56px;
@@ -33,14 +44,14 @@ html, body {
   padding: 0;
   background: var(--creme);
   color: var(--azul);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
   font-size: 17px;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, .display {
-  font-family: 'Poppins', system-ui, sans-serif;
+  font-family: 'Montserrat Alternates', system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0;
@@ -157,7 +168,7 @@ h2 { font-size: 22px; }
   width: 100%;
   min-height: var(--toque);
   padding: 15px 20px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Montserrat Alternates', sans-serif;
   font-size: 18px; font-weight: 600;
   border: none; border-radius: 14px;
   cursor: pointer;
@@ -165,7 +176,7 @@ h2 { font-size: 22px; }
 }
 
 .btn-principal { background: var(--azul); color: var(--branco); }
-.btn-principal:disabled { background: #9AA4BC; cursor: default; }
+.btn-principal:disabled { background: #9A9A9A; cursor: default; }
 .btn-verde { background: var(--verde); color: var(--branco); }
 
 .btn-texto {
@@ -203,10 +214,10 @@ h2 { font-size: 22px; }
 }
 .escolha:nth-child(2) .marcador { background: var(--rosa); }
 
-.escolha strong { display: block; font-family: 'Poppins', sans-serif; font-size: 17px; }
+.escolha strong { display: block; font-family: 'Montserrat Alternates', sans-serif; font-size: 17px; }
 .escolha small { color: var(--cinza); font-size: 14px; }
 
-.escolha.marcada { border-color: var(--azul); background: #F0F3FA; }
+.escolha.marcada { border-color: var(--azul); background: #EFEFEF; }
 
 /* ---------- lista de serviços do cadastro ---------- */
 
@@ -307,7 +318,7 @@ details.opcional .conteudo { padding: 0 18px 6px; }
   width: 44px; height: 44px; flex: 0 0 44px;
   border-radius: 14px 14px 14px 4px;
   background: var(--azul); color: var(--amarelo);
-  font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px;
+  font-family: 'Montserrat Alternates', sans-serif; font-weight: 700; font-size: 19px;
   display: flex; align-items: center; justify-content: center;
   border: none; cursor: pointer; overflow: hidden; padding: 0;
 }
@@ -330,13 +341,13 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
                 color: var(--azul); cursor: pointer; display: block; }
 
 .cartao .rotulo { font-size: 15px; color: var(--cinza); margin: 0 0 6px; }
-.cartao .valor  { font-family: 'Poppins', sans-serif; font-weight: 700;
+.cartao .valor  { font-family: 'Montserrat Alternates', sans-serif; font-weight: 700;
                   font-size: 28px; margin: 0; }
 
 /* O cartão do saldo usa o azul-marinho dos fundos da marca, não o azul
    dos botões — assim ele se destaca sem competir com eles. */
 .destaque { background: var(--azul-fundo); border-color: var(--azul-fundo); color: var(--branco); }
-.destaque .rotulo { color: #B9C6E6; }
+.destaque .rotulo { color: #C9C9C9; }
 .destaque .valor  { font-size: 40px; color: var(--branco); }
 
 .dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -413,7 +424,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 .abas {
   position: fixed; bottom: 0; left: 0; right: 0;
   max-width: 480px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   background: var(--branco); border-top: 1.5px solid var(--borda);
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 30;
@@ -421,7 +432,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 .abas button {
   background: none; border: none; cursor: pointer;
   padding: 10px 2px 12px; font-family: inherit;
-  font-size: 11px; font-weight: 600; color: var(--cinza);
+  font-size: 10.5px; font-weight: 600; color: var(--cinza); letter-spacing: -0.01em;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
 }
 /* Ícones desenhados em SVG, não em texto. Caracteres como ☺ e ✓ viram
@@ -470,6 +481,8 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 }
 .q-azul { background: var(--azul); } .q-rosa { background: var(--rosa); }
 .q-verde { background: var(--verde); } .q-laranja { background: var(--laranja); }
+.q-ceu { background: var(--ceu); color: var(--azul); }
+.q-rosa { color: var(--azul); }
 
 /* tela cheia sobreposta (formulários) */
 .folha.cheia .painel-folha { min-height: 100dvh; border-radius: 0; }
@@ -507,7 +520,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 .pastilhas button.marcada .conta { background: rgba(255,255,255,.24); color: var(--branco); }
 
 .secao-titulo {
-  font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px;
+  font-family: 'Montserrat Alternates', sans-serif; font-weight: 600; font-size: 15px;
   color: var(--cinza); text-transform: uppercase; letter-spacing: .04em;
   margin: 24px 0 10px;
 }
@@ -534,12 +547,12 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 /* Cabeçalho de cada dia na lista */
 .dia-agenda {
   display: flex; justify-content: space-between; align-items: baseline;
-  font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px;
+  font-family: 'Montserrat Alternates', sans-serif; font-weight: 600; font-size: 15px;
   color: var(--azul);
   margin: 20px 2px 8px; padding-bottom: 6px;
   border-bottom: 1.5px solid var(--borda);
 }
-.dia-agenda .total { font-family: 'Inter', sans-serif; font-size: 14px;
+.dia-agenda .total { font-family: 'Hanken Grotesk', sans-serif; font-size: 14px;
                      font-weight: 500; color: var(--cinza); text-transform: none; }
 
 /* A hora fica na frente, alinhada, para o olho descer pela coluna */
@@ -554,7 +567,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
   margin-bottom: 12px;
 }
 .mes-topo strong {
-  font-family: 'Poppins', sans-serif; font-size: 17px;
+  font-family: 'Montserrat Alternates', sans-serif; font-size: 17px;
   color: var(--azul);
 }
 .mes-topo button {
@@ -622,7 +635,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 /* Opção grande da folha de escolha do tipo */
 .acao.alta { align-items: flex-start; padding: 18px 16px; }
 .acao.alta .texto { display: block; text-align: left; }
-.acao.alta strong { display: block; font-family: 'Poppins', sans-serif; font-size: 17px; }
+.acao.alta strong { display: block; font-family: 'Montserrat Alternates', sans-serif; font-size: 17px; }
 .acao.alta small { color: var(--cinza); font-size: 14px; line-height: 1.35; display: block; }
 
 .campo textarea { resize: vertical; min-height: 96px; line-height: 1.45; }
@@ -664,7 +677,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 .linha-conta small { display: block; font-size: 13px; color: var(--cinza); font-weight: 400; }
 .linha-conta.soma { font-weight: 600; border-top: 1.5px solid var(--borda); }
 .linha-conta.total {
-  font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px;
+  font-family: 'Montserrat Alternates', sans-serif; font-weight: 700; font-size: 20px;
   color: var(--verde); border-top: 2px solid var(--borda); padding-top: 12px;
 }
 
@@ -681,7 +694,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 }
 .rodape-fixo .rotulo { display: block; font-size: 13px; color: var(--cinza); }
 .rodape-fixo strong {
-  font-family: 'Poppins', sans-serif; font-size: 22px; color: var(--verde);
+  font-family: 'Montserrat Alternates', sans-serif; font-size: 22px; color: var(--verde);
 }
 
 /* Linha de orçamento: o corpo abre o detalhe, a etiqueta troca o status */
@@ -749,7 +762,7 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
   background: repeating-linear-gradient(45deg,
     #F9B32B 0 12px, #14203A 12px 24px);
   color: #fff; text-align: center;
-  font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 700;
+  font-family: 'Montserrat Alternates', sans-serif; font-size: 12px; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
   padding: 5px 10px;
   text-shadow: 0 1px 3px rgba(0,0,0,.9);
@@ -757,3 +770,32 @@ button.cartao { width: 100%; text-align: left; font-family: inherit;
 }
 
 body.tem-faixa { padding-top: 26px; }
+
+/* ---------- Início no formato do site (29/09/2026) ----------
+   Saudação com o primeiro nome e cartões coloridos da paleta Loen,
+   igual ao desenho de loenstudiocriativo.com.br/solucoes. */
+.cabecalho.no-inicio #titulo-aba { visibility: hidden; }
+.saudacao { margin: -6px 0 18px; }
+.saudacao .ola {
+  margin: 0 0 2px;
+  font-family: 'Montserrat Alternates', system-ui, sans-serif;
+  font-weight: 600; font-size: 26px; letter-spacing: -0.02em; color: var(--azul);
+}
+.cartao.cor-lima  { background: var(--lima);  border-color: var(--lima); }
+.cartao.cor-lilas { background: var(--lilas); border-color: var(--lilas); }
+.cartao.cor-ceu   { background: var(--ceu);   border-color: var(--ceu); }
+.cartao.cor-lima .rotulo, .cartao.cor-lilas .rotulo, .cartao.cor-ceu .rotulo { color: var(--azul); }
+.cartao.hoje .rotulo-forte { margin: 0 0 8px; font-weight: 700; font-size: 15px; }
+.linha-hoje {
+  display: flex; justify-content: space-between; gap: 12px; width: 100%;
+  padding: 11px 0; border: none; border-top: 1px solid var(--borda);
+  background: none; font: inherit; font-size: 15px; color: var(--azul);
+  text-align: left; cursor: pointer;
+}
+.linha-hoje:first-of-type { border-top: none; }
+.linha-hoje span:last-child { color: var(--cinza); text-align: right; }
+
+/* Resposta do cliente no orçamento: aprovado ou recusado, com data e hora */
+.resposta-cliente { font-size: 14px; font-weight: 600; }
+.resposta-cliente.aprovado { color: var(--verde); }
+.resposta-cliente.recusado { color: var(--vermelho); }

@@ -151,9 +151,18 @@ async function responder(token, resposta) {
   const nao = document.getElementById('recusar');
   const aviso = document.getElementById('aviso');
 
-  // Aprovar é definitivo, então pergunta uma vez. Recusar não precisa:
-  // se ele mudar de ideia, pede um orçamento novo.
-  if (resposta === 'aprovado' && !confirm('Confirmar a aprovação deste orçamento?')) return;
+  // Aprovar é definitivo, então pede um segundo toque. Recusar não
+  // precisa: se ele mudar de ideia, pede um orçamento novo.
+  //
+  // Era um confirm() do navegador — e o navegador de dentro do WhatsApp
+  // e do Instagram, onde o cliente abre o link, bloqueia essa caixa sem
+  // avisar. O toque em "Aprovar" simplesmente sumia.
+  if (resposta === 'aprovado' && !sim.dataset.confirmando) {
+    sim.dataset.confirmando = '1';
+    sim.textContent = 'Toque de novo para confirmar';
+    aviso.innerHTML = recado('aviso', 'Você está aprovando este orçamento. Toque de novo no botão verde para confirmar.');
+    return;
+  }
 
   sim.disabled = nao.disabled = true;
   (resposta === 'aprovado' ? sim : nao).textContent = 'Enviando…';
@@ -164,6 +173,7 @@ async function responder(token, resposta) {
 
   if (error) {
     sim.disabled = nao.disabled = false;
+    delete sim.dataset.confirmando;
     sim.textContent = 'Aprovar orçamento';
     nao.textContent = 'Não vou fazer agora';
     aviso.innerHTML = recado('aviso', escapar(error.message || 'Não consegui enviar. Tente de novo.'));

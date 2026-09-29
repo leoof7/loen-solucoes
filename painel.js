@@ -303,8 +303,9 @@ function resumo() {
 function abrirAba(nome) {
   $$('.aba').forEach(a => a.classList.toggle('ativa', a.id === 'aba-' + nome));
   $$('.abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === nome));
+  $('.cabecalho').classList.toggle('no-inicio', nome === 'inicio');
   $('#titulo-aba').textContent = {
-    inicio: 'Início', servicos: 'Serviços', orcamentos: 'Orçamentos',
+    inicio: 'Início', agenda: 'Agenda', servicos: 'Serviços', orcamentos: 'Orçamentos',
     clientes: 'Clientes', financeiro: 'Financeiro'
   }[nome];
   window.scrollTo(0, 0);
@@ -341,6 +342,7 @@ $$('.folha').forEach(f => {
 function desenhar() {
   desenharCabecalho();
   desenharInicio();
+  desenharAgenda();
   desenharServicos();
   desenharClientes();
   desenharFinanceiro();
@@ -358,7 +360,9 @@ function desenharCabecalho() {
 function desenharInicio() {
   const r = resumo();
   const ehDono = estado.perfil.papel === 'dono';
-  let h = '';
+  const primeiroNome = (estado.perfil.nome || '').trim().split(/\s+/)[0];
+  let h = '<div class="saudacao"><p class="ola">Olá' + (primeiroNome ? ', ' + escapar(primeiroNome) : '') +
+          ' 👋</p><p class="rotulo">Seu mês até agora</p></div>';
 
   // Tutorial: some sozinho quando as três tarefas estiverem feitas
   const tem = {
@@ -376,30 +380,56 @@ function desenharInicio() {
          '</ul></div>';
   }
 
+  // Serviços marcados para hoje, na ordem da hora.
+  const deHoje = agendados().filter(a => a.data === hoje());
+  // Orçamentos que foram para o cliente e ainda não voltaram.
+  const aguardando = (estado.orcamentos || [])
+    .filter(o => o.status === 'enviado' || o.status === 'pensando').length;
+
   if (ehDono) {
-    h += '<div class="cartao destaque"><p class="rotulo">Saldo do negócio</p>' +
-         '<p class="valor">' + moeda(r.saldo) + '</p></div>';
-
     h += '<div class="dupla">' +
-         '<button class="cartao" data-ir-aba="financeiro"><p class="rotulo">Entradas do mês</p>' +
-         '<p class="valor verde">' + moeda(r.entradasMes) + '</p></button>' +
-         '<button class="cartao" data-ir-aba="financeiro"><p class="rotulo">Saídas do mês</p>' +
-         '<p class="valor verm">' + moeda(r.despesasMes) + '</p></button></div>';
+         '<button class="cartao cor-lima" data-ir-aba="financeiro"><p class="rotulo">Entrou</p>' +
+         '<p class="valor">' + moeda(r.entradasMes) + '</p></button>' +
+         '<button class="cartao cor-lilas" data-ir-aba="financeiro"><p class="rotulo">Saiu</p>' +
+         '<p class="valor">' + moeda(r.despesasMes) + '</p></button></div>';
+  }
 
+  h += '<div class="cartao hoje"><p class="rotulo-forte">Hoje</p>' +
+       (deHoje.length
+         ? deHoje.map(a =>
+             '<button class="linha-hoje" data-atendimento="' + a.id + '">' +
+             '<span>' + (a.hora ? a.hora.slice(0, 5) + ' · ' : '') +
+             escapar(a.clientes?.nome || 'Sem cliente') + '</span>' +
+             '<span>' + escapar(a.servico_nome || '') + '</span></button>').join('')
+         : '<p class="rotulo" style="margin:0">Nada marcado para hoje.</p>') +
+       '<button class="btn-texto" data-ir-aba="agenda" style="text-align:left;padding:10px 0 0;width:auto">Ver a agenda</button>' +
+       '</div>';
+
+  h += '<button class="cartao cor-ceu" data-ir-aba="orcamentos">' +
+       '<p class="rotulo">Orçamentos aguardando resposta</p>' +
+       '<p class="valor">' + aguardando + '</p></button>';
+
+  if (ehDono) {
+    // A meta mede o que ENTROU no mês (decidido em 29/09/2026 — antes
+    // media só as retiradas, e ninguém entendia a barra parada). Ver
+    // ADR-012 no escopo.
     if (r.meta > 0) {
-      const pct = Math.min(100, (r.tiradoParaSiMes / r.meta) * 100);
-      const estourou = r.tiradoParaSiMes > r.meta;
+      const pct = Math.min(100, (r.entradasMes / r.meta) * 100);
+      const chegou = r.entradasMes >= r.meta;
       h += '<button class="cartao" data-ir-aba="financeiro">' +
            '<p class="rotulo">Sua meta do mês</p>' +
-           '<p class="valor">' + moeda(r.tiradoParaSiMes) + ' <span style="font-size:17px;color:#5A6472">de ' + moeda(r.meta) + '</span></p>' +
-           '<div class="barra' + (estourou ? ' estourou' : '') + '"><i style="width:' + pct + '%"></i></div>' +
-           (estourou ? '<p class="rotulo" style="margin-top:8px">Você já retirou mais do que planejou este mês.</p>' : '') +
+           '<p class="valor">' + moeda(r.entradasMes) + ' <span style="font-size:17px;color:#4A4A4A">de ' + moeda(r.meta) + '</span></p>' +
+           '<div class="barra"><i style="width:' + pct + '%"></i></div>' +
+           (chegou ? '<p class="rotulo" style="margin-top:8px">Você chegou na meta deste mês.</p>' : '') +
            '</button>';
     } else {
       h += '<button class="cartao" data-ir-aba="financeiro">' +
            '<p class="rotulo">Sua meta do mês</p>' +
            '<p class="valor" style="font-size:19px">Definir quanto quero receber</p></button>';
     }
+
+    h += '<div class="cartao destaque"><p class="rotulo">Saldo do negócio</p>' +
+         '<p class="valor">' + moeda(r.saldo) + '</p></div>';
   }
 
   const qtdReceber = estado.atendimentos
@@ -415,11 +445,6 @@ function desenharInicio() {
          : '<p class="valor laranj">' + moeda(r.aReceber) + '</p>' +
            '<p class="rotulo" style="margin:6px 0 0">' + qtdReceber + ' serviço(s) sem pagamento</p>') +
        '</button>';
-
-  if (r.proximos.length) {
-    h += '<p class="secao-titulo">Próximos serviços</p>';
-    r.proximos.slice(0, 4).forEach(a => { h += linhaAtendimento(a); });
-  }
 
   $('#aba-inicio').innerHTML = h;
 
@@ -499,18 +524,14 @@ function desenharServicos() {
 
   const conta = (cond) => estado.atendimentos.filter(cond).length;
   const abas = [
-    ['agenda',   'Agenda',    conta(a => a.situacao === 'agendado' && a.data >= hoje())],
     ['todos',    'Todos',     estado.atendimentos.length],
     ['receber',  'A receber', conta(a => a.situacao === 'realizado' || a.situacao === 'pendente')],
     ['agendado', 'Agendados', conta(a => a.situacao === 'agendado')],
     ['pago',     'Pagos',     conta(a => a.situacao === 'pago')]
   ];
 
-  let h = '';
-  if (f !== 'agenda') {
-    h += '<div class="campo"><input id="busca-servico" type="search" ' +
-         'placeholder="Buscar por cliente ou serviço" value="' + escapar(busca) + '"></div>';
-  }
+  let h = '<div class="campo"><input id="busca-servico" type="search" ' +
+          'placeholder="Buscar por cliente ou serviço" value="' + escapar(busca) + '"></div>';
 
   h += '<div class="pastilhas rolante" id="filtro-servicos">' +
        abas.map(([v, rot, n]) =>
@@ -518,19 +539,15 @@ function desenharServicos() {
          rot + ' <span class="conta">' + n + '</span></button>').join('') +
        '</div>';
 
-  h += f === 'agenda'
-     ? montarAgenda()
-     : (lista.length
-          ? lista.map(linhaAtendimento).join('')
-          : '<div class="vazio"><strong>Nada aqui</strong>Nenhum serviço com esse filtro.</div>');
+  h += lista.length
+     ? lista.map(linhaAtendimento).join('')
+     : '<div class="vazio"><strong>Nada aqui</strong>Nenhum serviço com esse filtro.</div>';
 
   $('#aba-servicos').innerHTML = h;
   ligarListas('#aba-servicos');
 
   $$('#filtro-servicos button').forEach(b =>
     b.addEventListener('click', () => { estado.filtroServicos = b.dataset.valor; desenharServicos(); }));
-
-  if (f === 'agenda') { ligarAgenda(); return; }
 
   const campo = $('#busca-servico');
   campo.addEventListener('input', () => {
@@ -600,7 +617,7 @@ function agendaEmLista() {
   const proximos = agendados().filter(a => a.data >= hoje());
   if (!proximos.length) {
     return '<div class="vazio"><strong>Nada marcado</strong>' +
-           'Quando você registrar um serviço como "Agendado", ele aparece aqui.</div>';
+           'Toque em "Agendar um serviço" e ele aparece aqui, no dia marcado.</div>';
   }
 
   const porDia = {};
@@ -663,12 +680,23 @@ function agendaDoMes() {
   return h;
 }
 
+// Aba própria desde 29/09/2026 (antes era um modo dentro de Serviços,
+// e ninguém achava). Pedido do Leandro.
+function desenharAgenda() {
+  $('#aba-agenda').innerHTML =
+    '<button class="btn btn-principal" id="agenda-novo" type="button" style="margin:0 0 18px">' +
+    'Agendar um serviço</button>' + montarAgenda();
+  ligarListas('#aba-agenda');
+  ligarAgenda();
+  $('#agenda-novo').addEventListener('click', () => abrirFormServico('agendado'));
+}
+
 function ligarAgenda() {
   $$('#modo-agenda button').forEach(b =>
     b.addEventListener('click', () => {
       estado.modoAgenda = b.dataset.modo;
       estado.diaAgenda = null;
-      desenharServicos();
+      desenharAgenda();
     }));
 
   const mover = (passo) => {
@@ -676,7 +704,7 @@ function ligarAgenda() {
     base.setMonth(base.getMonth() + passo);
     estado.mesAgenda = base.getFullYear() + '-' + String(base.getMonth() + 1).padStart(2, '0');
     estado.diaAgenda = null;
-    desenharServicos();
+    desenharAgenda();
   };
   $('#mes-antes')?.addEventListener('click', () => mover(-1));
   $('#mes-depois')?.addEventListener('click', () => mover(1));
@@ -684,7 +712,7 @@ function ligarAgenda() {
   $$('.calendario .dia').forEach(b =>
     b.addEventListener('click', () => {
       estado.diaAgenda = estado.diaAgenda === b.dataset.dia ? null : b.dataset.dia;
-      desenharServicos();
+      desenharAgenda();
     }));
 }
 
@@ -798,7 +826,7 @@ function desenharFinanceiro() {
 
   h += '<p class="secao-titulo">Sua meta mensal</p>';
   h += '<button class="cartao" id="btn-meta">' +
-       '<p class="rotulo">Quanto você gostaria de receber por mês</p>' +
+       '<p class="rotulo">Quanto você quer receber por mês</p>' +
        '<p class="valor">' + (r.meta > 0 ? moeda(r.meta) : 'Não definido') + '</p>' +
        '<p class="rotulo" style="margin:8px 0 0">Toque para ' + (r.meta > 0 ? 'alterar' : 'definir') + '</p></button>';
 
@@ -848,6 +876,7 @@ function resumoLinha(rotulo, valor, cor) {
 
 function confirmar(titulo, textoHtml, rotuloSim = 'Confirmar', perigo = false) {
   return new Promise(resolve => {
+    if (typeof limparGradeStatus === 'function') limparGradeStatus();
     $('#pg-titulo').textContent = titulo;
     $('#pg-texto').innerHTML = textoHtml || '';
 
@@ -879,6 +908,7 @@ function confirmar(titulo, textoHtml, rotuloSim = 'Confirmar', perigo = false) {
 // botão que faz alguma coisa. É o que transforma "fale com a equipe"
 // de instrução em caminho — a pessoa não precisa achar a tela sozinha.
 function avisarNaFolha(titulo, textoHtml, acao) {
+  if (typeof limparGradeStatus === 'function') limparGradeStatus();
   $('#pg-titulo').textContent = titulo;
   $('#pg-texto').innerHTML = textoHtml || '';
 
@@ -922,6 +952,7 @@ function escapar(t) {
 
 $('#fab').addEventListener('click', () => abrirFolha('folha-novo'));
 
+$('#novo-agendamento').addEventListener('click', () => { fecharFolha('folha-novo'); abrirFormServico('agendado'); });
 $('#novo-servico').addEventListener('click',  () => { fecharFolha('folha-novo'); abrirFormServico(); });
 $('#novo-cliente').addEventListener('click',  () => { fecharFolha('folha-novo'); abrirFormCliente(); });
 $('#nova-entrada').addEventListener('click',  () => { fecharFolha('folha-novo'); abrirFormLancamento('entrada'); });
@@ -1074,7 +1105,8 @@ $('#btn-arquivar-cliente').addEventListener('click', async () => {
 // Formulário: serviço
 // ------------------------------------------------------------
 
-function abrirFormServico() {
+// situacao: 'pago' (padrão) ou 'agendado', quando vem da Agenda.
+function abrirFormServico(situacao = 'pago') {
   if (!estado.clientes.length) {
     avisarNaFolha('Falta um cliente',
       'Para registrar um servico voce precisa ter pelo menos um cliente cadastrado. Vou abrir o cadastro para voce.');
@@ -1097,7 +1129,7 @@ function abrirFormServico() {
   $('#sv-hora').value = '';
   $('#campo-hora').style.display = estado.temHora ? 'block' : 'none';
   $('#sv-endereco').value = '';
-  marcarPastilha('#sv-situacao', 'pago');
+  marcarPastilha('#sv-situacao', situacao);
   marcarPastilha('#sv-pagamento', 'Dinheiro');
   encherParcelas('#sv-parcelas', 1);
   atualizarParcelasServico();
@@ -1111,6 +1143,13 @@ function atualizarCampoOutro() {
   $('#campo-outro').style.display = usaOutro ? 'block' : 'none';
   $('#sv-outro-nome').required = usaOutro;
 }
+
+$('#sv-cadastrar-servico').addEventListener('click', () => {
+  estado.voltarParaRegistro = valorPastilha('#sv-situacao') || 'pago';
+  fecharFolha('folha-servico');
+  abrirCatalogo();
+  $('#btn-novo-servico-catalogo').click();
+});
 
 $('#sv-servico').addEventListener('change', () => {
   const op = $('#sv-servico').selectedOptions[0];
@@ -1449,20 +1488,26 @@ function abrirCatalogo() {
   abrirFolha('folha-catalogo');
 }
 
+// Preço guardado (1920.5) no formato que a máscara usa ("1.920,50").
+function precoNoCampo(v) {
+  if (v === null || v === undefined || v === '') return '';
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function desenharCatalogo() {
   let h = '';
 
   if (!estado.catalogo.length) {
     const sug = SERVICOS_SUGERIDOS[estado.negocio?.tipo_atividade] || [];
     if (sug.length) {
-      h += '<p style="color:#5A6472;margin:0 0 14px">Estes são os serviços mais comuns de ' +
+      h += '<p style="color:#4A4A4A;margin:0 0 14px">Estes são os serviços mais comuns de ' +
            escapar(estado.negocio.tipo_atividade).toLowerCase() +
            '. Desmarque o que você não faz e coloque quanto cobra.</p>';
       sug.forEach((nome, i) => {
         h += '<div class="servico-linha marcada">' +
              '<input type="checkbox" id="sg' + i + '" checked>' +
              '<label class="nome" for="sg' + i + '">' + escapar(nome) + '</label>' +
-             '<input class="preco" type="number" inputmode="decimal" min="0" step="0.01" placeholder="R$">' +
+             '<input class="preco" type="text" data-dinheiro data-reais inputmode="numeric" placeholder="R$">' +
              '</div>';
       });
       h += '<button class="btn btn-verde" id="btn-salvar-sugeridos">Salvar meus serviços</button>';
@@ -1473,14 +1518,15 @@ function desenharCatalogo() {
       h += '<div class="item"><div class="corpo">' +
            '<span class="titulo">' + escapar(s.nome) + '</span>' +
            '<span class="sub">Preço alterado em ' + dataCurta(s.atualizado_em) + '</span></div>' +
-           '<input class="preco" type="number" inputmode="decimal" min="0" step="0.01" ' +
-           'data-servico="' + s.id + '" value="' + (s.preco_atual ?? '') + '"></div>';
+           '<input class="preco" type="text" data-dinheiro data-reais inputmode="numeric" ' +
+           'data-servico="' + s.id + '" value="' + precoNoCampo(s.preco_atual) + '"></div>';
     });
     h += '<button class="btn btn-principal" id="btn-salvar-precos">Salvar preços</button>';
     h += '<button class="btn btn-secundario" id="btn-novo-servico-catalogo">Cadastrar outro serviço</button>';
   }
 
   $('#conteudo-catalogo').innerHTML = h;
+  $('#conteudo-catalogo input[data-reais]').forEach(mascararReais);
 
   const bs = $('#btn-salvar-sugeridos');
   if (bs) bs.addEventListener('click', salvarSugeridos);
@@ -1512,7 +1558,7 @@ async function salvarSugeridos() {
     linhas.push({
       negocio_id: estado.perfil.negocio_id,
       nome: l.querySelector('.nome').textContent,
-      preco_atual: p === '' ? null : Number(p)
+      preco_atual: p ?? null
     });
   });
 
@@ -1587,7 +1633,7 @@ $('#form-novo-servico').addEventListener('submit', async (e) => {
   const { error } = await sb.from('servicos_catalogo').insert({
     negocio_id: estado.perfil.negocio_id,
     nome: $('#ns-nome').value.trim(),
-    preco_atual: preco === '' ? null : Number(preco)
+    preco_atual: preco ?? null
   });
 
   ocupado(botao, false);
@@ -1595,6 +1641,18 @@ $('#form-novo-servico').addEventListener('submit', async (e) => {
 
   $('#form-novo-servico').style.display = 'none';
   await recarregar();
+
+  // Veio do "Cadastrar um serviço novo" do registro: volta para lá,
+  // com o serviço recém-criado já escolhido.
+  if (estado.voltarParaRegistro) {
+    const situacao = estado.voltarParaRegistro;
+    estado.voltarParaRegistro = null;
+    fecharFolha('folha-catalogo');
+    abrirFormServico(situacao);
+    const criado = estado.catalogo.find(s => s.nome === $('#ns-nome').value.trim());
+    if (criado) { $('#sv-servico').value = criado.id; $('#sv-servico').dispatchEvent(new Event('change')); }
+    return;
+  }
   desenharCatalogo();
 });
 
@@ -1659,9 +1717,28 @@ async function recarregar() {
   desenhar();
 }
 
+// Os exemplos dentro dos campos saem da PROFISSÃO de quem usa: a
+// manicure lê "Mão e pé", o pintor lê "Pintura interna". Antes todo
+// mundo lia "Pintura da sala e do corredor" (pedido do Leandro,
+// 29/09/2026). A lista é a mesma dos serviços sugeridos — diferença de
+// nicho vive em dado, não em if espalhado.
+// Quem escolheu "Outro" (ou uma profissão sem lista) fica com o exemplo
+// neutro que já está no HTML.
+function aplicarExemplos() {
+  const sugeridos = SERVICOS_SUGERIDOS[estado.negocio?.tipo_atividade] || [];
+  if (!sugeridos.length) return;
+  // "Alvenaria (m²)" → "Alvenaria": a unidade confunde no exemplo.
+  const limpo = (s) => s.replace(/\s*\([^)]*\)\s*$/, '');
+  const principal = limpo(sugeridos.find(s => / e /.test(s)) || sugeridos[0]);
+  ['#or-titulo', '#ca-titulo'].forEach(sel => { const c = $(sel); if (c) c.placeholder = principal; });
+  const outro = limpo(sugeridos[sugeridos.length - 1]);
+  const ns = $('#ns-nome'); if (ns) ns.placeholder = outro;
+}
+
 async function abrirApp() {
   const ok = await carregarTudo();
   if (!ok) return false;
+  aplicarExemplos();
   await carregarImagem();
 
   // Mesma manutenção que o recarregar() faz. Entrar no app é justamente
@@ -2395,9 +2472,10 @@ function gastosPorCategoria(mesesAtras = 0) {
   };
 }
 
-// Cores da marca, na ordem. A maior fatia fica com o azul principal.
-const CORES_GRAFICO = ['#1E3F91', '#F5851F', '#17593A', '#D9569A',
-                       '#F9B32B', '#A31208', '#5A6472'];
+// Cores da paleta da Loen, na ordem. A maior fatia fica com o preto.
+// Vizinhas contrastam entre si, para duas fatias não se confundirem.
+const CORES_GRAFICO = ['#111111', '#F35204', '#5B3FC4', '#95BFF1',
+                       '#17593A', '#C3ABFF', '#9A9A9A'];
 
 function desenharGraficoDeGastos() {
   const g = gastosPorCategoria(estado.mesDoGrafico || 0);

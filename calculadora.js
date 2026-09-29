@@ -25,7 +25,7 @@ function linhaItem(area, descricaoPadrao) {
   div.innerHTML =
     '<input type="text" class="desc" placeholder="' + descricaoPadrao + '">' +
     '<input type="text" class="qtd" data-dinheiro inputmode="decimal" placeholder="1">' +
-    '<input type="text" class="unit" data-dinheiro inputmode="decimal" placeholder="R$">' +
+    '<input type="text" class="unit" data-dinheiro data-reais inputmode="numeric" placeholder="R$">' +
     '<button type="button" class="tirar" aria-label="Remover">×</button>';
 
   div.querySelector('.tirar').addEventListener('click', () => {
@@ -35,6 +35,7 @@ function linhaItem(area, descricaoPadrao) {
   // Estas linhas nascem depois que a pagina carregou, entao o filtro de
   // digitacao precisa ser ligado aqui — o $() do app.js ja tinha passado.
   div.querySelectorAll('input[data-dinheiro]').forEach(filtrarCampoDinheiro);
+  div.querySelectorAll('input[data-reais]').forEach(mascararReais);
   div.querySelectorAll('input').forEach(i => i.addEventListener('input', recalcular));
 
   $('#' + area).appendChild(div);
@@ -246,8 +247,9 @@ $('#btn-salvar-calculadora').addEventListener('click', async () => {
     estado.calculadoraEditando = null;
     fecharFolha('folha-calculadora');
     await recarregar();
-    abrirAba('orcamentos');
-    return abrirOrcamento(editando.id);
+    // Volta para a lista. Antes reabria o orçamento, e parecia que
+    // tinha duplicado (pedido do Leandro em 29/09/2026).
+    return abrirAba('orcamentos');
   }
 
   const { data: orc, error } = await sb.from('orcamentos').insert({
@@ -273,7 +275,6 @@ $('#btn-salvar-calculadora').addEventListener('click', async () => {
   fecharFolha('folha-calculadora');
   await recarregar();
   abrirAba('orcamentos');
-  abrirOrcamento(orc.id);
 });
 
 

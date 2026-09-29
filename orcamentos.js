@@ -116,13 +116,27 @@ function desenharOrcamentos() {
 // status na hora, sem abrir nada — e a pessoa esta olhando justamente
 // para ela quando lembra que o cliente respondeu.
 // Tocar no resto da linha abre o detalhe, como antes.
+// "Aprovado pelo cliente em 29/09/2026 às 14:32" — só quando foi o
+// CLIENTE que respondeu pelo link. Se quem usa o app mudar o status à
+// mão depois, a resposta do cliente continua registrada e aparecendo.
+function respostaDoCliente(o) {
+  if (!o.respondido_em || !o.resposta_cliente) return '';
+  const d = new Date(o.respondido_em);
+  const quando = d.toLocaleDateString('pt-BR') + ' às ' +
+                 d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return (o.resposta_cliente === 'aprovado' ? 'Aprovado' : 'Recusado') +
+         ' pelo cliente em ' + quando;
+}
+
 function linhaOrcamento(o) {
   const s = STATUS_ORC[o.status] || STATUS_ORC.rascunho;
   const c = estado.clientes.find(x => x.id === o.cliente_id) || {};
+  const resposta = respostaDoCliente(o);
   return '<div class="item linha-orcamento">' +
          '<button class="corpo" data-orcamento="' + o.id + '">' +
          '<span class="titulo">' + escapar(c.nome || 'Sem cliente') + '</span>' +
          '<span class="sub">' + escapar(o.titulo || '') + ' · ' + dataCurta(o.criado_em) + '</span>' +
+         (resposta ? '<span class="sub resposta-cliente ' + o.resposta_cliente + '">' + resposta + '</span>' : '') +
          '</button>' +
          '<div class="direita">' +
          '<span class="dinheiro">' + moeda(o.valor) + '</span>' +
@@ -264,7 +278,12 @@ function abrirOrcamento(id) {
           '<p class="valor" style="font-size:22px">' + escapar(o.titulo || '') + '</p>' +
           '<p class="valor verde" style="margin-top:10px">' + moeda(o.valor) + '</p>' +
           '<span class="etiqueta ' + s.classe + '" style="display:inline-block;margin-top:10px">' +
-          s.rotulo + '</span></div>';
+          s.rotulo + '</span>' +
+          (respostaDoCliente(o)
+            ? '<p class="resposta-cliente ' + o.resposta_cliente + '" style="margin:10px 0 0">' +
+              respostaDoCliente(o) + '</p>'
+            : '') +
+          '</div>';
 
   if (o.descricao) {
     h += '<div class="cartao"><p class="rotulo">Detalhes</p><p style="margin:0">' +
@@ -553,9 +572,22 @@ async function virarServico(o) {
 // escolhe, pronto. Sem abrir o orçamento, sem rolar tela.
 // ------------------------------------------------------------
 
+// Desfaz o que a escolha de status põe na folha de pergunta, que é
+// compartilhada com os avisos e as confirmações do app.
+function limparGradeStatus() {
+  $$('#grade-status').forEach(g => g.remove());
+  $('#pg-sim').style.display = '';
+  $('#pg-nao').textContent = 'Cancelar';
+}
+
 function escolherStatus(id) {
   const o = (estado.orcamentos || []).find(x => x.id === id);
   if (!o) return;
+
+  // Quem fecha a folha tocando fora não passa pelo "Fechar", e os
+  // botões da vez anterior ficavam lá — a grade aparecia duplicada.
+  // Limpa sempre antes de montar.
+  limparGradeStatus();
 
   $('#pg-titulo').textContent = 'Em que pé está?';
   $('#pg-texto').innerHTML =
@@ -575,11 +607,7 @@ function escolherStatus(id) {
   sim.style.display = 'none';
   $('#pg-nao').textContent = 'Fechar';
 
-  const limpar = () => {
-    $('#grade-status')?.remove();
-    sim.style.display = '';
-    $('#pg-nao').textContent = 'Cancelar';
-  };
+  const limpar = limparGradeStatus;
 
   const nao = $('#pg-nao');
   const novoNao = nao.cloneNode(true);

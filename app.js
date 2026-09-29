@@ -176,7 +176,28 @@ function filtrarCampoDinheiro(campo) {
   });
 }
 
-$$('input[data-dinheiro]').forEach(filtrarCampoDinheiro);
+$('input[data-dinheiro]').forEach(filtrarCampoDinheiro);
+
+// Máscara de dinheiro, do jeito dos apps de banco: a pessoa só digita
+// números e a vírgula e o ponto aparecem sozinhos. 5 → 0,05; 500 → 5,00;
+// 500000 → 5.000,00. Pedido do Leandro em 29/09/2026 — ninguém precisa
+// mais caçar a vírgula no teclado.
+//
+// Só nos campos de DINHEIRO (data-reais). Quantidade e porcentagem
+// continuam livres: "3" de quantidade não pode virar "0,03".
+// O texto fica no formato que lerDinheiro() já entende ("1.234,56").
+function mascararReais(campo) {
+  if (!campo || campo.dataset.mascara) return;
+  campo.dataset.mascara = '1';
+  campo.addEventListener('input', () => {
+    const d = campo.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 10);
+    campo.value = d
+      ? (Number(d) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : '';
+  });
+}
+
+$('input[data-reais]').forEach(mascararReais);
 
 // Dinheiro nunca é negativo neste app: nem preço, nem custo, nem valor
 // cobrado. Um "-" que escape do filtro viraria desconto silencioso na

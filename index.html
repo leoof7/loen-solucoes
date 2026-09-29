@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#14357F">
+<meta name="theme-color" content="#F7F7F7">
 <title>Loen Soluções</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=8">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=9">
 </head>
 <body>
 
@@ -59,7 +59,7 @@
     </div>
 
     <h1 id="titulo-cadastro">Vamos começar</h1>
-    <p style="color:#5A6472;margin:10px 0 0">
+    <p style="color:#4A4A4A;margin:10px 0 0">
       Leva menos de um minuto. Seus serviços e preços você cadastra depois, já dentro do app.
     </p>
 
@@ -142,7 +142,7 @@
         <div class="conteudo">
           <div class="campo">
             <label for="c-negocio">Nome do negócio</label>
-            <input type="text" id="c-negocio" placeholder="Studio Cida Unhas">
+            <input type="text" id="c-negocio" placeholder="O nome do seu negócio">
           </div>
         </div>
       </details>
@@ -160,7 +160,7 @@
     </div>
 
     <h1>Recebi um convite</h1>
-    <p style="color:#5A6472;margin:10px 0 0">
+    <p style="color:#4A4A4A;margin:10px 0 0">
       Use o código que o dono do negócio te mandou pelo WhatsApp.
     </p>
 
@@ -220,7 +220,7 @@
   <!-- ========== SENHA NOVA (aberta pelo link do e-mail) ========== -->
   <section class="tela" id="tela-nova-senha">
     <h1>Crie uma senha nova</h1>
-    <p style="color:#5A6472;margin:10px 0 0" id="nova-senha-texto">
+    <p style="color:#4A4A4A;margin:10px 0 0" id="nova-senha-texto">
       Conferindo o link…
     </p>
 
@@ -266,6 +266,7 @@
 
   <main class="conteudo">
     <section class="aba ativa" id="aba-inicio"></section>
+    <section class="aba" id="aba-agenda"></section>
     <section class="aba" id="aba-servicos"></section>
     <section class="aba" id="aba-orcamentos"></section>
     <section class="aba" id="aba-clientes"></section>
@@ -281,6 +282,11 @@
       stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M3 10.2 12 3l9 7.2"/><path d="M5.5 9.2V20h13V9.2"/><path d="M9.8 20v-5.4h4.4V20"/>
       </svg></span>Início</button>
+
+    <button data-aba="agenda"><span class="ico"><svg viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.4"/><path d="M3.5 10h17M8 3v4M16 3v4"/>
+      </svg></span>Agenda</button>
 
     <button data-aba="servicos"><span class="ico"><svg viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -310,11 +316,14 @@
 <div class="folha" id="folha-novo">
   <div class="painel-folha">
     <h3>O que você quer fazer?</h3>
+    <!-- Na mesma ordem das abas de baixo: Agenda, Serviços, Orçamentos,
+         Clientes, Financeiro. -->
+    <button class="acao" id="novo-agendamento"><span class="quad q-ceu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.4"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>Agendar um serviço</button>
     <button class="acao" id="novo-servico"><span class="quad q-rosa">✓</span>Registrar um serviço</button>
+    <button class="acao" id="novo-orcamento"><span class="quad q-azul">▤</span>Fazer um orçamento</button>
     <button class="acao" id="novo-cliente"><span class="quad q-azul">☺</span>Cadastrar um cliente</button>
     <button class="acao" id="nova-entrada"><span class="quad q-verde">+</span>Entrada de dinheiro</button>
     <button class="acao" id="nova-saida"><span class="quad q-laranja">−</span>Saída de dinheiro</button>
-    <button class="acao" id="novo-orcamento"><span class="quad q-azul">▤</span>Fazer um orçamento</button>
     <button class="btn-texto" data-fecha="folha-novo">Cancelar</button>
   </div>
 </div>
@@ -374,13 +383,15 @@
         <select id="sv-cliente" required></select></div>
 
       <div class="campo"><label for="sv-servico">Serviço</label>
-        <select id="sv-servico"></select></div>
+        <select id="sv-servico"></select>
+        <button type="button" class="btn-texto" id="sv-cadastrar-servico"
+                style="text-align:left;padding:8px 0;width:auto">Cadastrar um serviço novo</button></div>
 
       <div class="campo" id="campo-outro"><label for="sv-outro-nome">Qual serviço</label>
         <input type="text" id="sv-outro-nome"></div>
 
       <div class="campo"><label for="sv-valor">Valor cobrado</label>
-        <input type="text" id="sv-valor" data-dinheiro inputmode="decimal" required></div>
+        <input type="text" id="sv-valor" data-dinheiro data-reais inputmode="numeric" required></div>
 
       <div class="dupla-campo">
         <div class="campo"><label for="sv-data">Data</label>
@@ -459,14 +470,14 @@
                 style="text-align:left;padding:8px 0;width:auto">Cadastrar um cliente novo</button></div>
 
       <div class="campo"><label for="or-titulo">O que é o serviço</label>
-        <input type="text" id="or-titulo" placeholder="Pintura da sala e do corredor" required></div>
+        <input type="text" id="or-titulo" placeholder="O serviço que você vai fazer" required></div>
 
       <div class="campo"><label for="or-descricao">Detalhes (opcional)</label>
         <textarea id="or-descricao" rows="4"
-          placeholder="Duas demãos, massa corrida onde precisar, tinta por conta do cliente"></textarea></div>
+          placeholder="O que está incluído, material, observações"></textarea></div>
 
       <div class="campo"><label for="or-valor">Quanto você vai cobrar</label>
-        <input type="text" id="or-valor" data-dinheiro inputmode="decimal" required></div>
+        <input type="text" id="or-valor" data-dinheiro data-reais inputmode="numeric" required></div>
 
       <div class="campo"><label>Como o cliente pode pagar</label>
         <div class="pastilhas rolante" id="or-pagamento">
@@ -519,7 +530,7 @@
       <select id="ca-cliente" required></select></div>
 
     <div class="campo"><label for="ca-titulo">O que é o serviço</label>
-      <input type="text" id="ca-titulo" placeholder="Pintura da sala e do corredor" required></div>
+      <input type="text" id="ca-titulo" placeholder="O serviço que você vai fazer" required></div>
 
     <!-- MATERIAIS -->
     <p class="secao-titulo">Material que você vai comprar</p>
@@ -537,14 +548,14 @@
         <div class="campo" style="margin:0"><label for="ca-qtd-trabalho">Quantos</label>
           <input type="text" id="ca-qtd-trabalho" data-dinheiro inputmode="decimal" placeholder="3"></div>
         <div class="campo" style="margin:0"><label for="ca-valor-trabalho" id="ca-rotulo-diaria">Valor da diária</label>
-          <input type="text" id="ca-valor-trabalho" data-dinheiro inputmode="decimal" placeholder="200,00"></div>
+          <input type="text" id="ca-valor-trabalho" data-dinheiro data-reais inputmode="numeric" placeholder="200,00"></div>
       </div>
     </div>
 
     <!-- DESLOCAMENTO -->
     <p class="secao-titulo">Deslocamento</p>
     <div class="campo">
-      <input type="text" id="ca-deslocamento" data-dinheiro inputmode="decimal" placeholder="0,00">
+      <input type="text" id="ca-deslocamento" data-dinheiro data-reais inputmode="numeric" placeholder="0,00">
       <p class="dica">Gasolina, ônibus, pedágio. Deixe vazio se não tem.</p>
     </div>
 
@@ -575,7 +586,7 @@
 
     <div class="campo">
       <label for="ca-total">Valor final do orçamento</label>
-      <input type="text" id="ca-total" data-dinheiro inputmode="decimal">
+      <input type="text" id="ca-total" data-dinheiro data-reais inputmode="numeric">
       <p class="dica">Você pode arredondar. A conta acima fica guardada do mesmo jeito.</p>
     </div>
 
@@ -620,7 +631,7 @@
     </div>
     <div class="aviso" id="aviso-esqueci"></div>
     <form id="form-esqueci">
-      <p style="color:#5A6472;margin:0 0 18px;line-height:1.5">
+      <p style="color:#4A4A4A;margin:0 0 18px;line-height:1.5">
         Digite o celular ou o e-mail da sua conta. Mandamos um link para o
         seu e-mail, e por ele você cria uma senha nova.
       </p>
@@ -643,7 +654,7 @@
       <button class="voltar" id="em-voltar" data-fecha="folha-email" type="button">‹</button>
       <h3>Meu e-mail</h3>
     </div>
-    <p style="color:#5A6472;margin:0 0 18px;line-height:1.5" id="em-texto">
+    <p style="color:#4A4A4A;margin:0 0 18px;line-height:1.5" id="em-texto">
       É para este e-mail que mandamos o link se você esquecer a senha.
       Também dá para entrar no app com ele.
     </p>
@@ -703,13 +714,13 @@
       <button class="voltar" data-fecha="folha-negocio" type="button">‹</button>
       <h3>Dados do meu negócio</h3>
     </div>
-    <p style="color:#5A6472;margin:0 0 18px">
+    <p style="color:#4A4A4A;margin:0 0 18px">
       Tudo aqui aparece no orçamento que você manda para o cliente.
     </p>
     <div class="aviso" id="aviso-negocio"></div>
     <form id="form-negocio">
       <div class="campo"><label for="ng-nome">Nome do negócio</label>
-        <input type="text" id="ng-nome" placeholder="Studio Cida Unhas"></div>
+        <input type="text" id="ng-nome" placeholder="O nome do seu negócio"></div>
 
       <div class="campo"><label for="ng-cnpj">CNPJ</label>
         <input type="text" id="ng-cnpj" inputmode="numeric" placeholder="00.000.000/0000-00">
@@ -750,7 +761,7 @@
 <div class="folha" id="folha-pergunta">
   <div class="painel-folha">
     <h3 id="pg-titulo"></h3>
-    <p id="pg-texto" style="color:#5A6472;margin:0 0 22px;line-height:1.5"></p>
+    <p id="pg-texto" style="color:#4A4A4A;margin:0 0 22px;line-height:1.5"></p>
     <button class="btn btn-principal" id="pg-sim">Confirmar</button>
     <button class="btn btn-secundario" id="pg-extra" style="display:none"></button>
     <button class="btn-texto" id="pg-nao">Cancelar</button>
@@ -774,7 +785,7 @@
         <input type="text" id="ed-servico" required></div>
 
       <div class="campo"><label for="ed-valor">Valor cobrado</label>
-        <input type="text" id="ed-valor" data-dinheiro inputmode="decimal" required></div>
+        <input type="text" id="ed-valor" data-dinheiro data-reais inputmode="numeric" required></div>
 
       <div class="dupla-campo">
         <div class="campo"><label for="ed-data">Data</label>
@@ -816,7 +827,7 @@
       <button class="voltar" data-fecha="folha-convidar" type="button">‹</button>
       <h3>Convidar para a equipe</h3>
     </div>
-    <p style="color:#5A6472;margin:0 0 18px">
+    <p style="color:#4A4A4A;margin:0 0 18px">
       Gere um código e mande pela pessoa no WhatsApp. Ela entra em
       "Recebi um convite da minha equipe" e digita esse código.
     </p>
@@ -839,7 +850,7 @@
       <input type="hidden" id="lc-tipo">
 
       <div class="campo"><label for="lc-valor">Valor</label>
-        <input type="text" id="lc-valor" data-dinheiro inputmode="decimal" required></div>
+        <input type="text" id="lc-valor" data-dinheiro data-reais inputmode="numeric" required></div>
 
       <div class="campo"><label for="lc-data">Data</label>
         <input type="date" id="lc-data" required></div>
@@ -878,14 +889,14 @@
       <button class="voltar" data-fecha="folha-meta" type="button">‹</button>
       <h3>Sua meta mensal</h3>
     </div>
-    <p style="color:#5A6472;margin:0 0 18px">
-      Quanto você gostaria de receber por mês? Isso será sua meta. Depois, o app
-      ajuda você a acompanhar se o negócio consegue pagar esse valor.
+    <p style="color:#4A4A4A;margin:0 0 18px">
+      Quanto você quer receber por mês? Isso será sua meta. No Início, o app
+      mostra quanto já entrou no mês e quanto falta para chegar lá.
     </p>
     <div class="aviso" id="aviso-meta"></div>
     <form id="form-meta">
       <div class="campo"><label for="mt-valor">Valor por mês</label>
-        <input type="text" id="mt-valor" data-dinheiro inputmode="decimal" placeholder="2000,00"></div>
+        <input type="text" id="mt-valor" data-dinheiro data-reais inputmode="numeric" placeholder="2.000,00"></div>
       <div class="campo"><label for="mt-dia">Em que dia você costuma retirar</label>
         <input type="number" id="mt-dia" inputmode="numeric" min="1" max="31" placeholder="10"></div>
       <button class="btn btn-principal" id="btn-salvar-meta" type="submit">Salvar meta</button>
@@ -909,7 +920,7 @@
           <button type="button" data-valor="extra">Retirada extra</button>
         </div></div>
       <div class="campo"><label for="rt-valor">Valor</label>
-        <input type="text" id="rt-valor" data-dinheiro inputmode="decimal" required></div>
+        <input type="text" id="rt-valor" data-dinheiro data-reais inputmode="numeric" required></div>
       <div class="campo"><label for="rt-data">Data</label>
         <input type="date" id="rt-data" required></div>
       <button class="btn btn-principal" id="btn-salvar-retirada" type="submit">Salvar retirada</button>
@@ -997,9 +1008,9 @@
 
     <form id="form-novo-servico" style="display:none;margin-top:8px">
       <div class="campo"><label for="ns-nome">Nome do serviço</label>
-        <input type="text" id="ns-nome" placeholder="Instalação de fechadura" required></div>
+        <input type="text" id="ns-nome" placeholder="Nome do serviço" required></div>
       <div class="campo"><label for="ns-preco">Quanto você cobra (opcional)</label>
-        <input type="text" id="ns-preco" data-dinheiro inputmode="decimal" placeholder="R$"></div>
+        <input type="text" id="ns-preco" data-dinheiro data-reais inputmode="numeric" placeholder="R$"></div>
       <div class="aviso" id="aviso-novo-servico"></div>
       <button class="btn btn-verde" id="btn-criar-servico" type="submit">Adicionar ao meu catálogo</button>
       <button class="btn-texto" id="cancelar-novo-servico" type="button">Cancelar</button>
@@ -1034,11 +1045,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="config.js?v=8"></script>
-<script src="app.js?v=8"></script>
-<script src="painel.js?v=8"></script>
-<script src="orcamentos.js?v=8"></script>
-<script src="calculadora.js?v=8"></script>
-<script src="pdf.js?v=8"></script>
+<script src="config.js?v=9"></script>
+<script src="app.js?v=9"></script>
+<script src="painel.js?v=9"></script>
+<script src="orcamentos.js?v=9"></script>
+<script src="calculadora.js?v=9"></script>
+<script src="pdf.js?v=9"></script>
 </body>
 </html>
